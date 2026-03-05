@@ -11,9 +11,11 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ### Chang Jia Jun
 
-<img src="images/jiajunchang2002g" width="200px">
+<img src="images/jiajunchang2002g.png" width="200px">
 
 * Role: Documentation
+
+[[github](https://github.com/jiajunchang2002g)]
 
 ### Ashwika Gupta
 
