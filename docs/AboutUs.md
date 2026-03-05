@@ -9,15 +9,15 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Ashwika Gupta
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/ashwacka.png" width="200px">
 
-[[homepage](http://www.comp.nus.edu.sg/~damithch)]
-[[github](https://github.com/johndoe)]
+[[homepage](ashwacka.github.io)]
+[[github](https://github.com/ashwacka)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Project Advisor
+* Role: Scheduling and Tracking
 
 ### Isaac Chen
 
