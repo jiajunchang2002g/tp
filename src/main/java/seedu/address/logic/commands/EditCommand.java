@@ -101,7 +101,9 @@ public class EditCommand extends Command {
         Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
 
-        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags);
+        // Stage is not currently editable; preserve the existing stage.
+        return new Person(updatedName, updatedPhone, updatedEmail,
+                updatedAddress, personToEdit.getStage(), updatedTags);
     }
 
     @Override

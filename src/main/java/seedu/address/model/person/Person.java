@@ -21,6 +21,7 @@ public class Person {
     private final Phone phone;
     private final Email email;
     private final Alias alias;
+    private final Stage stage;
 
     // Data fields
     private final Address address;
@@ -29,13 +30,14 @@ public class Person {
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, tags);
+    public Person(Name name, Phone phone, Email email, Address address, Stage stage, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, address, stage, tags);
         this.name = name;
         this.alias = new Alias(name.toString());
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.stage = stage;
         this.tags.addAll(tags);
     }
 
@@ -57,6 +59,10 @@ public class Person {
 
     public Address getAddress() {
         return address;
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 
     /**
@@ -100,13 +106,14 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
+                && stage.equals(otherPerson.stage)
                 && tags.equals(otherPerson.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, phone, email, address, stage, tags);
     }
 
     @Override
@@ -116,6 +123,7 @@ public class Person {
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
+                .add("stage", stage)
                 .add("tags", tags)
                 .toString();
     }
