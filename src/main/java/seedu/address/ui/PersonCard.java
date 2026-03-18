@@ -30,8 +30,8 @@ public class PersonCard extends UiPart<Region> {
     private HBox cardPane;
     @FXML
     private Label name;
-    @FXML
-    private Label alias;
+    //@FXML
+    //private Label alias;
     @FXML
     private Label id;
     @FXML
@@ -50,7 +50,7 @@ public class PersonCard extends UiPart<Region> {
         super(FXML);
         this.person = person;
         id.setText(displayedIndex + ". ");
-        alias.setText(person.getAlias().aliasString);
+        //alias.setText(person.getAlias().aliasString);
         name.setText(person.getName().fullName);
         phone.setText(person.getPhone().value);
         address.setText(person.getAddress().value);
