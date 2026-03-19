@@ -6,6 +6,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTES;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_RISK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_STAGE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
@@ -40,6 +41,7 @@ public class PersonUtil {
             sb.append(PREFIX_NOTES).append(person.getNotes().value).append(" ");
         }
         sb.append(PREFIX_RISK).append(person.getRisk().toString()).append(" ");
+        person.getTags().forEach(tag -> sb.append(PREFIX_TAG).append(tag.tagName).append(" "));
         return sb.toString();
     }
 

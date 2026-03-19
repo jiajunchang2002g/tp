@@ -11,6 +11,7 @@ public class CliSyntax {
     public static final Prefix PREFIX_ALIAS = new Prefix("al/");
     public static final Prefix PREFIX_NOTES = new Prefix("note/");
     public static final Prefix PREFIX_RISK = new Prefix("r/");
+    public static final Prefix PREFIX_TAG = new Prefix("t/");
     public static final Prefix PREFIX_STAGE = new Prefix("s/");
 
 }

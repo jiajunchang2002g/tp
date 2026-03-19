@@ -11,6 +11,7 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
@@ -24,6 +25,7 @@ import seedu.address.model.person.Name;
 import seedu.address.model.person.Notes;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Risk;
+import seedu.address.model.tag.Tag;
 
 /**
  * Edits the details of an existing person in the address book.
@@ -96,10 +98,11 @@ public class EditCommand extends Command {
         List<Alias> updatedAliases = editPersonDescriptor.getAliases().orElse(personToEdit.getAliases());
         Notes updatedNotes = editPersonDescriptor.getNotes().orElse(personToEdit.getNotes());
         Risk updatedRisk = editPersonDescriptor.getRisk().orElse(personToEdit.getRisk());
+        Set<Tag> updatedTags = personToEdit.getTags();
 
         // Stage is not currently editable; preserve the existing stage.
         return new Person(updatedName, updatedAddress, personToEdit.getStage(), updatedAliases, updatedNotes,
-                updatedRisk);
+                updatedRisk, updatedTags);
     }
 
     @Override

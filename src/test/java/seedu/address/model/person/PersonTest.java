@@ -80,7 +80,7 @@ public class PersonTest {
                 + ", address=" + ALICE.getAddress()
                 + ", aliases=" + ALICE.getAliases()
                 + ", notes=" + ALICE.getNotes()
-                + ", stage=" + ALICE.getStage() + ", risk=" + ALICE.getRisk() + "}";
+                + ", stage=" + ALICE.getStage() + ", risk=" + ALICE.getRisk() + ", tags=" + ALICE.getTags() + "}";
         assertEquals(expected, ALICE.toString());
     }
 }

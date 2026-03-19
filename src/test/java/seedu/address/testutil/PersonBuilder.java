@@ -1,6 +1,8 @@
 package seedu.address.testutil;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Alias;
@@ -8,6 +10,7 @@ import seedu.address.model.person.Name;
 import seedu.address.model.person.Notes;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Risk;
+import seedu.address.model.tag.Tag;
 
 /**
  * A utility class to help with building Person objects.
@@ -23,6 +26,7 @@ public class PersonBuilder {
     private List<Alias> aliases;
     private Notes notes;
     private Risk risk;
+    private Set<Tag> tags;
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -34,6 +38,7 @@ public class PersonBuilder {
         aliases = List.of();
         notes = new Notes("");
         risk = Risk.getDefault();
+        tags = Set.of();
     }
 
     /**
@@ -46,6 +51,7 @@ public class PersonBuilder {
         aliases = personToCopy.getAliases();
         notes = personToCopy.getNotes();
         risk = personToCopy.getRisk();
+        tags = personToCopy.getTags();
     }
 
     /**
@@ -98,8 +104,18 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Parses the {@code tags} into a {@code Set<Tag>} and set it to the {@code Person} that we are building.
+     */
+    public PersonBuilder withTags(String... tags) {
+        this.tags = java.util.Arrays.stream(tags)
+                .map(Tag::new)
+                .collect(Collectors.toSet());
+        return this;
+    }
+
     public Person build() {
-        return new Person(name, address, stage, aliases, notes, risk);
+        return new Person(name, address, stage, aliases, notes, risk, tags);
     }
 
 }

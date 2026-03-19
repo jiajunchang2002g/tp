@@ -46,7 +46,9 @@ public class Messages {
                 .append("; Stage: ")
                 .append(person.getStage())
                 .append("; Risk: ")
-                .append(person.getRisk());
+                .append(person.getRisk())
+                .append("; Tags: ");
+        person.getTags().forEach(builder::append);
         return builder.toString();
     }
 

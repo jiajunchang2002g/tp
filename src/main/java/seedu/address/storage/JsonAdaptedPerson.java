@@ -1,7 +1,9 @@
 package seedu.address.storage;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,6 +17,7 @@ import seedu.address.model.person.Notes;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Risk;
 import seedu.address.model.person.Stage;
+import seedu.address.model.tag.Tag;
 
 /**
  * Jackson-friendly version of {@link Person}.
@@ -29,6 +32,7 @@ class JsonAdaptedPerson {
     private final List<String> aliases = new ArrayList<>();
     private final String notes;
     private final String risk;
+    private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
@@ -39,7 +43,8 @@ class JsonAdaptedPerson {
             @JsonProperty("stage") String stage,
             @JsonProperty("aliases") List<String> aliases,
             @JsonProperty("notes") String notes,
-            @JsonProperty("risk") String risk) {
+            @JsonProperty("risk") String risk,
+            @JsonProperty("tags") List<JsonAdaptedTag> tags) {
         this.name = name;
         this.address = address;
         this.stage = stage;
@@ -48,6 +53,9 @@ class JsonAdaptedPerson {
         }
         this.notes = notes;
         this.risk = risk;
+        if (tags != null) {
+            this.tags.addAll(tags);
+        }
     }
 
     /**
@@ -62,6 +70,9 @@ class JsonAdaptedPerson {
                 .collect(Collectors.toList()));
         notes = source.getNotes().value;
         risk = source.getRisk().toString();
+        tags.addAll(source.getTags().stream()
+                .map(JsonAdaptedTag::new)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -70,6 +81,11 @@ class JsonAdaptedPerson {
      * @throws IllegalValueException if there were any data constraints violated in the adapted person.
      */
     public Person toModelType() throws IllegalValueException {
+        final List<Tag> personTags = new ArrayList<>();
+        for (JsonAdaptedTag tag : tags) {
+            personTags.add(tag.toModelType());
+        }
+
         final List<Alias> personAliases = new ArrayList<>();
         for (String alias : aliases) {
             if (alias == null || !Alias.isValidAlias(alias.trim())) {
@@ -125,7 +141,8 @@ class JsonAdaptedPerson {
             throw new IllegalValueException(Stage.MESSAGE_CONSTRAINTS);
         }
 
-        return new Person(modelName, modelAddress, modelStage, personAliases, modelNotes, modelRisk);
+        final Set<Tag> modelTags = new HashSet<>(personTags);
+        return new Person(modelName, modelAddress, modelStage, personAliases, modelNotes, modelRisk, modelTags);
     }
 
 }

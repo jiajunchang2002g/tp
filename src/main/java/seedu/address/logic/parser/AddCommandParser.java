@@ -7,8 +7,10 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTES;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_RISK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_STAGE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import seedu.address.logic.commands.AddCommand;
@@ -20,6 +22,7 @@ import seedu.address.model.person.Notes;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Risk;
 import seedu.address.model.person.Stage;
+import seedu.address.model.tag.Tag;
 
 /**
  * Parses input arguments and creates a new AddCommand object
@@ -34,7 +37,7 @@ public class AddCommandParser implements Parser<AddCommand> {
     public AddCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args,
-                        PREFIX_NAME, PREFIX_ADDRESS, PREFIX_ALIAS, PREFIX_NOTES, PREFIX_RISK, PREFIX_STAGE);
+                        PREFIX_NAME, PREFIX_ADDRESS, PREFIX_ALIAS, PREFIX_NOTES, PREFIX_RISK, PREFIX_TAG, PREFIX_STAGE);
 
         if (!arePrefixesPresent(argMultimap, PREFIX_NAME, PREFIX_ADDRESS, PREFIX_STAGE)
                 || !argMultimap.getPreamble().isEmpty()) {
@@ -60,9 +63,10 @@ public class AddCommandParser implements Parser<AddCommand> {
         if (argMultimap.getValue(PREFIX_RISK).isPresent()) {
             risk = ParserUtil.parseRisk(argMultimap.getValue(PREFIX_RISK).get());
         }
+        Set<Tag> tagList = ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG));
         Stage stage = parseStage(argMultimap.getValue(PREFIX_STAGE).get());
 
-        Person person = new Person(name, address, stage, aliases, notes, risk);
+        Person person = new Person(name, address, stage, aliases, notes, risk, tagList);
 
         return new AddCommand(person);
     }
