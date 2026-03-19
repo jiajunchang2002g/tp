@@ -4,36 +4,36 @@
     "name" : "Alice Pauline",
     "address" : "123, Jurong West Ave 6, #08-111",
     "stage" : "surveillance",
-    "tags" : [ "friends" ]
+    "risk" : "low"
   }, {
     "name" : "Benson Meier",
     "address" : "311, Clementi Ave 2, #02-25",
     "stage" : "surveillance",
-    "tags" : [ "owesMoney", "friends" ]
+    "risk" : "high"
   }, {
     "name" : "Carl Kurz",
     "address" : "wall street",
     "stage" : "surveillance",
-    "tags" : [ ]
+    "risk" : "medium"
   }, {
     "name" : "Daniel Meier",
     "address" : "10th street",
     "stage" : "surveillance",
-    "tags" : [ "friends" ]
+    "risk" : "medium"
   }, {
     "name" : "Elle Meyer",
     "address" : "michegan ave",
     "stage" : "surveillance",
-    "tags" : [ ]
+    "risk" : "medium"
   }, {
     "name" : "Fiona Kunz",
     "address" : "little tokyo",
     "stage" : "surveillance",
-    "tags" : [ ]
+    "risk" : "medium"
   }, {
     "name" : "George Best",
     "address" : "4th street",
     "stage" : "surveillance",
-    "tags" : [ ]
+    "risk" : "medium"
   } ]
 }

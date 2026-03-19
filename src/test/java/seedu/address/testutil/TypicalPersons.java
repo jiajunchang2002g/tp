@@ -4,8 +4,8 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_RISK_HIGH;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_RISK_LOW;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,14 +21,14 @@ public class TypicalPersons {
 
     public static final Person ALICE = new PersonBuilder().withName("Alice Pauline")
             .withAddress("123, Jurong West Ave 6, #08-111")
-            .withTags("friends").build();
+            .withRisk(VALID_RISK_LOW).build();
     public static final Person BENSON = new PersonBuilder().withName("Benson Meier")
             .withAddress("311, Clementi Ave 2, #02-25")
-            .withTags("owesMoney", "friends").build();
+            .withRisk(VALID_RISK_HIGH).build();
     public static final Person CARL = new PersonBuilder().withName("Carl Kurz")
             .withAddress("wall street").build();
     public static final Person DANIEL = new PersonBuilder().withName("Daniel Meier")
-            .withAddress("10th street").withTags("friends").build();
+            .withAddress("10th street").build();
     public static final Person ELLE = new PersonBuilder().withName("Elle Meyer")
             .withAddress("michegan ave").build();
     public static final Person FIONA = new PersonBuilder().withName("Fiona Kunz")
@@ -45,10 +45,10 @@ public class TypicalPersons {
     // Manually added - Person's details found in {@code CommandTestUtil}
     public static final Person AMY = new PersonBuilder().withName(VALID_NAME_AMY)
             .withAddress(VALID_ADDRESS_AMY)
-            .withStage("surveillance").withTags(VALID_TAG_FRIEND).build();
+            .withStage("surveillance").withRisk(VALID_RISK_LOW).build();
     public static final Person BOB = new PersonBuilder().withName(VALID_NAME_BOB)
             .withAddress(VALID_ADDRESS_BOB)
-            .withStage("approached").withTags(VALID_TAG_HUSBAND, VALID_TAG_FRIEND).build();
+            .withStage("approached").withRisk(VALID_RISK_HIGH).build();
 
     public static final String KEYWORD_MATCHING_MEIER = "Meier"; // A keyword that matches MEIER
 

@@ -1,15 +1,13 @@
 package seedu.address.testutil;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Alias;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Notes;
 import seedu.address.model.person.Person;
-import seedu.address.model.tag.Tag;
+import seedu.address.model.person.Risk;
 import seedu.address.model.util.SampleDataUtil;
 
 /**
@@ -25,7 +23,7 @@ public class PersonBuilder {
     private seedu.address.model.person.Stage stage;
     private List<Alias> aliases;
     private Notes notes;
-    private Set<Tag> tags;
+    private Risk risk;
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -36,7 +34,7 @@ public class PersonBuilder {
         stage = seedu.address.model.person.Stage.SURVEILLANCE;
         aliases = List.of();
         notes = new Notes("");
-        tags = new HashSet<>();
+        risk = Risk.getDefault();
     }
 
     /**
@@ -48,7 +46,7 @@ public class PersonBuilder {
         stage = personToCopy.getStage();
         aliases = personToCopy.getAliases();
         notes = personToCopy.getNotes();
-        tags = new HashSet<>(personToCopy.getTags());
+        risk = personToCopy.getRisk();
     }
 
     /**
@@ -59,11 +57,8 @@ public class PersonBuilder {
         return this;
     }
 
-    /**
-     * Parses the {@code tags} into a {@code Set<Tag>} and set it to the {@code Person} that we are building.
-     */
-    public PersonBuilder withTags(String ... tags) {
-        this.tags = SampleDataUtil.getTagSet(tags);
+    public PersonBuilder withRisk(String risk) {
+        this.risk = seedu.address.model.person.Risk.fromString(risk);
         return this;
     }
 
@@ -99,7 +94,7 @@ public class PersonBuilder {
     }
 
     public Person build() {
-        return new Person(name, address, stage, aliases, notes, tags);
+        return new Person(name, address, stage, aliases, notes, risk);
     }
 
 }

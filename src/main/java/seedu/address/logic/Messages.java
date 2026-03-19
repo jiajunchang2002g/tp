@@ -45,8 +45,8 @@ public class Messages {
                 .append(person.getNotes())
                 .append("; Stage: ")
                 .append(person.getStage())
-                .append("; Tags: ");
-        person.getTags().forEach(builder::append);
+                .append("; Risk: ")
+                .append(person.getRisk());
         return builder.toString();
     }
 

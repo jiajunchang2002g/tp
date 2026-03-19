@@ -10,7 +10,7 @@ import seedu.address.model.person.Address;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Notes;
 import seedu.address.model.person.Person;
-import seedu.address.model.tag.Tag;
+import seedu.address.model.person.Risk;
 
 /**
  * Contains utility methods for populating {@code AddressBook} with sample data.
@@ -23,37 +23,37 @@ public class SampleDataUtil {
                 seedu.address.model.person.Stage.SURVEILLANCE,
                 java.util.List.of(),
                 new Notes(""),
-                getTagSet("friends")),
+                Risk.getDefault()),
             new Person(new Name("Bernice Yu"),
                 new Address("Blk 30 Lorong 3 Serangoon Gardens, #07-18"),
                 seedu.address.model.person.Stage.APPROACHED,
                 java.util.List.of(),
                 new Notes(""),
-                getTagSet("colleagues", "friends")),
+                Risk.getDefault()),
             new Person(new Name("Charlotte Oliveiro"),
                 new Address("Blk 11 Ang Mo Kio Street 74, #11-04"),
                 seedu.address.model.person.Stage.COOPERATING,
                 java.util.List.of(),
                 new Notes(""),
-                getTagSet("neighbours")),
+                Risk.getDefault()),
             new Person(new Name("David Li"),
                 new Address("Blk 436 Serangoon Gardens Street 26, #16-43"),
                 seedu.address.model.person.Stage.ARRESTED,
                 java.util.List.of(),
                 new Notes(""),
-                getTagSet("family")),
+                Risk.getDefault()),
             new Person(new Name("Irfan Ibrahim"),
                 new Address("Blk 47 Tampines Street 20, #17-35"),
                 seedu.address.model.person.Stage.SURVEILLANCE,
                 java.util.List.of(),
                 new Notes(""),
-                getTagSet("classmates")),
+                Risk.getDefault()),
             new Person(new Name("Roy Balakrishnan"),
                 new Address("Blk 45 Aljunied Street 85, #11-31"),
                 seedu.address.model.person.Stage.CLOSED,
                 java.util.List.of(),
                 new Notes(""),
-                getTagSet("colleagues"))
+                Risk.getDefault())
         };
     }
 
@@ -63,15 +63,6 @@ public class SampleDataUtil {
             sampleAb.addPerson(samplePerson);
         }
         return sampleAb;
-    }
-
-    /**
-     * Returns a tag set containing the list of strings given.
-     */
-    public static Set<Tag> getTagSet(String... strings) {
-        return Arrays.stream(strings)
-                .map(Tag::new)
-                .collect(Collectors.toSet());
     }
 
 }

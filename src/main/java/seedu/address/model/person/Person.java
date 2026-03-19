@@ -3,13 +3,10 @@ package seedu.address.model.person;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.model.tag.Tag;
 
 /**
  * Represents a Person in the address book.
@@ -25,19 +22,19 @@ public class Person {
     private final Address address;
     private final List<Alias> aliases;
     private final Notes notes;
-    private final Set<Tag> tags = new HashSet<>();
+    private final Risk risk;
 
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, Address address, Stage stage, List<Alias> aliases, Notes notes, Set<Tag> tags) {
-        requireAllNonNull(name, address, stage, aliases, notes, tags);
+    public Person(Name name, Address address, Stage stage, List<Alias> aliases, Notes notes, Risk risk) {
+        requireAllNonNull(name, address, stage, aliases, notes, risk);
         this.name = name;
         this.address = address;
         this.stage = stage;
         this.aliases = List.copyOf(aliases);
         this.notes = notes;
-        this.tags.addAll(tags);
+        this.risk = risk;
     }
 
     public Name getName() {
@@ -60,12 +57,8 @@ public class Person {
         return stage;
     }
 
-    /**
-     * Returns an immutable tag set, which throws {@code UnsupportedOperationException}
-     * if modification is attempted.
-     */
-    public Set<Tag> getTags() {
-        return Collections.unmodifiableSet(tags);
+    public Risk getRisk() {
+        return risk;
     }
 
     /**
@@ -102,13 +95,13 @@ public class Person {
                 && stage.equals(otherPerson.stage)
                 && aliases.equals(otherPerson.aliases)
                 && notes.equals(otherPerson.notes)
-                && tags.equals(otherPerson.tags);
+                && risk.equals(otherPerson.risk);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, address, stage, aliases, notes, tags);
+        return Objects.hash(name, address, stage, aliases, notes, risk);
     }
 
     @Override
@@ -119,7 +112,7 @@ public class Person {
                 .add("aliases", aliases)
                 .add("notes", notes)
                 .add("stage", stage)
-                .add("tags", tags)
+                .add("risk", risk)
                 .toString();
     }
 
