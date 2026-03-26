@@ -157,6 +157,20 @@ Format: `view INDEX`
 Example:
 * `view 1`
 
+### Exporting encounters to CSV : `export`
+
+Exports all encounters matching the given `l/LOCATION` into a CSV file.
+
+Format: `export l/LOCATION`
+
+* Location matching is case-insensitive.
+* Leading/trailing whitespace in `LOCATION` is ignored.
+* The CSV is written to the `exports/` folder in your app home directory, as `CrimeWatch-export-<timestamp>.csv`.
+* If no encounters match, the command fails with `No encounters found at location LOCATION.` and no CSV file is created.
+
+Example:
+* `export l/Harbor District`
+
 ### Deleting a person : `delete`
 
 Deletes the specified person from the address book.
@@ -226,6 +240,7 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [s/STAGE] [al/ALIAS(,ALIAS...)] [note/NOTES] [r/RISK] [t/TAG]…​`<br> e.g.,`edit 2 s/arrested r/high t/criminal`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Log** | `log INDEX d/DATE t/TIME l/LOCATION desc/DESCRIPTION [out/OUTCOME]`<br> e.g., `log 1 d/2026-02-21 t/18:30 l/Maxwell Road desc/Met at cafe out/Agreed to cooperate`
+**Export** | `export l/LOCATION`<br> e.g., `export l/Harbor District`
 **List** | `list`
 **View** | `view INDEX`<br> e.g., `view 1`
 **Help** | `help`
