@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,29 @@ public class ExportCommand extends Command {
     private final String location;
 
     /**
+     * A single CSV row representing one matching encounter.
+     */
+    private static class ExportRow {
+        private final LocalDateTime encounterDateTime;
+        private final String encounterTimestamp;
+        private final String encounterDescription;
+        private final String encounterOutcome;
+        private final String contactName;
+        private final String contactTags;
+
+        ExportRow(LocalDateTime encounterDateTime, String encounterTimestamp,
+                  String encounterDescription, String encounterOutcome,
+                  String contactName, String contactTags) {
+            this.encounterDateTime = encounterDateTime;
+            this.encounterTimestamp = encounterTimestamp;
+            this.encounterDescription = encounterDescription;
+            this.encounterOutcome = encounterOutcome;
+            this.contactName = contactName;
+            this.contactTags = contactTags;
+        }
+    }
+
+    /**
      * Creates an export command for encounters matching the given location.
      *
      * @param location encounter location to match (must not be blank)
@@ -67,25 +91,41 @@ public class ExportCommand extends Command {
 
             int matchedCount = 0;
             try (BufferedWriter writer = Files.newBufferedWriter(exportFile, StandardCharsets.UTF_8)) {
-                writer.write("contactName,contactTags,encounter");
+                writer.write("encounterTimestamp,encounterDescription,encounterOutcome,contactName,contactTags");
                 writer.newLine();
+
+                List<ExportRow> rows = new ArrayList<>();
 
                 for (Person person : people) {
                     String contactName = person.getName().fullName;
                     String contactTags = person.getTags().stream()
                             .sorted(Comparator.comparing(tag -> tag.tagName))
                             .map(tag -> tag.tagName)
-                            .collect(Collectors.joining(","));
-
-                    String contactPrefix = csvField(contactName) + "," + csvField(contactTags) + ",";
+                            .collect(Collectors.joining(", "));
 
                     for (Encounter encounter : person.getEncounters()) {
                         if (matchesLocation(encounter, location)) {
-                            writer.write(contactPrefix + csvField(formatEncounter(encounter)));
-                            writer.newLine();
+                            rows.add(new ExportRow(
+                                    encounter.dateTime,
+                                    encounter.getFormattedDateTime(),
+                                    encounter.description,
+                                    encounter.outcome.orElse(""),
+                                    contactName,
+                                    contactTags));
                             matchedCount++;
                         }
                     }
+                }
+
+                rows.sort(Comparator.comparing(row -> row.encounterDateTime));
+
+                for (ExportRow row : rows) {
+                    writer.write(csvField(row.encounterTimestamp) + ","
+                            + csvField(row.encounterDescription) + ","
+                            + csvField(row.encounterOutcome) + ","
+                            + csvField(row.contactName) + ","
+                            + csvField(row.contactTags));
+                    writer.newLine();
                 }
             }
 
@@ -99,17 +139,6 @@ public class ExportCommand extends Command {
     private static boolean matchesLocation(Encounter encounter, String targetLocation) {
         // Case-insensitive match; trim both sides to be forgiving of user input spacing.
         return encounter.location.trim().equalsIgnoreCase(targetLocation.trim());
-    }
-
-    private static String formatEncounter(Encounter encounter) {
-        // Keep it simple for the MVP: all encounter info goes into a single CSV field.
-        // (timestamp | location | description | outcome)
-        String outcomeStr = encounter.outcome.orElse("");
-        String outcomePart = outcomeStr.isEmpty() ? "" : " | outcome: " + outcomeStr;
-        return encounter.getFormattedDateTime()
-                + " | location: " + encounter.location
-                + " | description: " + encounter.description
-                + outcomePart;
     }
 
     private static String csvField(String value) {
