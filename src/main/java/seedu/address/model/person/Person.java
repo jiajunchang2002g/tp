@@ -32,15 +32,16 @@ public class Person {
     private final Risk risk;
     private final Set<Tag> tags = new HashSet<>();
     private final List<Encounter> encounters = new ArrayList<>();
+    private final List<Reminder> reminders = new ArrayList<>();
     private final Password password;
 
     /**
      * Full constructor - every field must be present and not null.
      */
     public Person(Name name, Phone phone, Email email, Address address, Stage stage,
-            List<Alias> aliases, Notes notes, Risk risk, Set<Tag> tags, List<Encounter> encounters,
-            Password password) {
-        requireAllNonNull(name, phone, email, address, stage, aliases, notes, risk, tags, encounters);
+            List<Alias> aliases, Notes notes, Risk risk, Set<Tag> tags,
+            List<Encounter> encounters, List<Reminder> reminders, Password password) {
+        requireAllNonNull(name, phone, email, address, stage, aliases, notes, risk, tags, encounters, reminders);
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -51,15 +52,36 @@ public class Person {
         this.risk = risk;
         this.tags.addAll(tags);
         this.encounters.addAll(encounters);
+        this.reminders.addAll(reminders);
         this.password = password;
+    }
+
+    /**
+     * Convenience constructor without reminders.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Stage stage,
+            List<Alias> aliases, Notes notes, Risk risk, Set<Tag> tags, List<Encounter> encounters) {
+        this(name, phone, email, address, stage, aliases, notes, risk, tags,
+                encounters, Collections.emptyList(), null);
     }
 
     /**
      * Convenience constructor without password.
      */
     public Person(Name name, Phone phone, Email email, Address address, Stage stage,
-            List<Alias> aliases, Notes notes, Risk risk, Set<Tag> tags, List<Encounter> encounters) {
-        this(name, phone, email, address, stage, aliases, notes, risk, tags, encounters, null);
+            List<Alias> aliases, Notes notes, Risk risk, Set<Tag> tags,
+            List<Encounter> encounters, List<Reminder> reminders) {
+        this(name, phone, email, address, stage, aliases, notes, risk, tags, encounters, reminders, null);
+    }
+
+    /**
+     * Convenience constructor without reminders.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Stage stage,
+            List<Alias> aliases, Notes notes, Risk risk, Set<Tag> tags, List<Encounter> encounters,
+            Password password) {
+        this(name, phone, email, address, stage, aliases, notes, risk, tags,
+                encounters, Collections.emptyList(), password);
     }
 
     /**
@@ -76,7 +98,7 @@ public class Person {
      */
     public Person(Name name, Phone phone, Email email, Address address, Stage stage, Set<Tag> tags) {
         this(name, phone, email, address, stage, List.of(), new Notes(""), Risk.getDefault(), tags,
-                Collections.emptyList());
+                Collections.emptyList(), Collections.emptyList(), null);
     }
 
     public Name getName() {
@@ -140,6 +162,14 @@ public class Person {
     }
 
     /**
+     * Returns an immutable reminder list, which throws {@code UnsupportedOperationException}
+     * if modification is attempted.
+     */
+    public List<Reminder> getReminders() {
+        return Collections.unmodifiableList(reminders);
+    }
+
+    /**
      * Returns the password of the person.
      */
     public Password getPassword() {
@@ -199,12 +229,14 @@ public class Person {
                 && risk.equals(otherPerson.risk)
                 && tags.equals(otherPerson.tags)
                 && encounters.equals(otherPerson.encounters)
+                && reminders.equals(otherPerson.reminders)
                 && Objects.equals(password, otherPerson.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, phone, email, address, stage, aliases, notes, risk, tags, encounters, password);
+        return Objects.hash(name, phone, email, address, stage, aliases, notes, risk, tags, encounters,
+                reminders, password);
     }
 
     @Override
@@ -220,6 +252,7 @@ public class Person {
                 .add("risk", risk)
                 .add("tags", tags)
                 .add("encounters", encounters)
+                .add("reminders", reminders)
                 .toString();
     }
 

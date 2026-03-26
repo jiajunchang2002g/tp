@@ -1,5 +1,7 @@
 package seedu.address.ui;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javafx.fxml.FXML;
@@ -11,6 +13,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import seedu.address.model.person.Encounter;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Reminder;
 
 /**
  * Panel that displays the full profile of a viewed contact including encounter history.
@@ -43,6 +46,10 @@ public class ViewPanel extends UiPart<Region> {
     private Label notesLabel;
     @FXML
     private FlowPane tagsPane;
+    @FXML
+    private VBox reminderBox;
+    @FXML
+    private Label noRemindersLabel;
     @FXML
     private VBox encounterBox;
     @FXML
@@ -101,7 +108,31 @@ public class ViewPanel extends UiPart<Region> {
             tagsPane.getChildren().add(noTags);
         }
 
+        populateReminders(person.getReminders());
         populateEncounters(person.getEncounters());
+    }
+
+    private void populateReminders(List<Reminder> reminders) {
+        reminderBox.getChildren().clear();
+
+        if (reminders.isEmpty()) {
+            Label empty = new Label("No reminders set.");
+            empty.getStyleClass().add("view-value-dim");
+            empty.setWrapText(true);
+            reminderBox.getChildren().add(empty);
+            return;
+        }
+
+        List<Reminder> sortedReminders = new ArrayList<>(reminders);
+        Collections.sort(sortedReminders);
+
+        for (Reminder reminder : sortedReminders) {
+            Label row = new Label(String.format("[%s %s] - %s",
+                    reminder.getDate(), reminder.getTime(), reminder.getNote()));
+            row.getStyleClass().add("view-value");
+            row.setWrapText(true);
+            reminderBox.getChildren().add(row);
+        }
     }
 
     private void populateEncounters(List<Encounter> encounters) {

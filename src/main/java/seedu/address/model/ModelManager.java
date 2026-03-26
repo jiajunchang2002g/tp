@@ -4,7 +4,10 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -13,7 +16,9 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.core.index.Index;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Reminder;
 
 /**
  * Represents the in-memory model of the CrimeWatch data.
@@ -113,6 +118,31 @@ public class ModelManager implements Model {
         requireAllNonNull(target, editedPerson);
 
         addressBook.setPerson(target, editedPerson);
+    }
+
+    @Override
+    public void addReminderToContact(Index index, Reminder reminder) {
+        requireAllNonNull(index, reminder);
+
+        Person target = filteredPersons.get(index.getZeroBased());
+        List<Reminder> updatedReminders = new ArrayList<>(target.getReminders());
+        updatedReminders.add(reminder);
+        Collections.sort(updatedReminders);
+
+        Person updatedPerson = new Person(
+                target.getName(),
+                target.getPhone(),
+                target.getEmail(),
+                target.getAddress(),
+                target.getStage(),
+                target.getAliases(),
+                target.getNotes(),
+                target.getRisk(),
+                target.getTags(),
+                target.getEncounters(),
+                updatedReminders,
+                target.getPassword());
+        setPerson(target, updatedPerson);
     }
 
     //=========== Filtered Person List Accessors =============================================================

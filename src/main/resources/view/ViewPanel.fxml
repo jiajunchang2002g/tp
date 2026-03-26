@@ -47,6 +47,14 @@
 
       <Separator styleClass="view-separator" />
 
+      <Label text="UPCOMING REMINDERS" styleClass="view-field-label" />
+      <VBox fx:id="reminderBox" spacing="6">
+        <Label fx:id="noRemindersLabel" text="No reminders set."
+               styleClass="view-value-dim" wrapText="true" />
+      </VBox>
+
+      <Separator styleClass="view-separator" />
+
       <Label text="ENCOUNTER HISTORY" styleClass="view-field-label" />
       <VBox fx:id="encounterBox" spacing="6">
         <Label fx:id="noEncountersLabel" text="No encounters logged."

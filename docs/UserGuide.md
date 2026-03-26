@@ -14,9 +14,10 @@ CrimeWatch is a CLI-based contact tracking tool for managing **person-of-interes
 4. Log Encounter
 5. Edit Encounter
 6. View Contact
-7. Search Contacts
-8. Export encounters (CSV)
-9. Sort Contacts
+7. Set Reminder
+8. Search Contacts
+9. Export encounters (CSV)
+10. Sort Contacts
 
 ## Command summary
 
@@ -28,11 +29,12 @@ CrimeWatch is a CLI-based contact tracking tool for managing **person-of-interes
 | Log Encounter | `log INDEX d/DATE t/TIME l/LOCATION desc/DESCRIPTION [out/OUTCOME]` |
 | Edit Encounter | `editencounter PERSON_INDEX ENCOUNTER_INDEX [d/DATE] [t/TIME] [l/LOCATION] [desc/DESCRIPTION] [out/OUTCOME]` |
 | View Contact | `view INDEX` |
+| Set Reminder | `remind INDEX d/DATE t/TIME note/NOTE` |
 | Search Contacts | `find KEYWORD [MORE_KEYWORDS]` |
 | Export encounters (CSV) | `export l/LOCATION` |
 | Sort Contacts | `sort CRITERION` |
 
-   
+
 * Table of Contents
 {:toc}
 
@@ -78,10 +80,10 @@ CrimeWatch is a CLI-based contact tracking tool for managing **person-of-interes
 - Parameters can be in any order unless stated otherwise.
 - Optional parameters are shown in square brackets `[LIKE_THIS]`.
 - **Do not repeat prefixes** in the same command (e.g. `n/... n/...`) — this is treated as an error.
-- Index-based commands (`view`, `log`, `delete`, `edit`) use the **INDEX shown in the current contact list panel**.
+- Index-based commands (`view`, `log`, `delete`, `edit`, `remind`) use the **INDEX shown in the current contact list panel**.
   - INDEX must be a positive integer: `1, 2, 3, ...`
 - For `editencounter`, use two indices: `PERSON_INDEX` from contact list and `ENCOUNTER_INDEX` from the viewed encounter cards.
- 
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## Features
@@ -140,14 +142,14 @@ Creates a new contact profile (suspect / person of interest).
 - Length: 1–100 characters
 - Allowed characters: letters, spaces, apostrophes, hyphens
 - Leading/trailing spaces ignored; multiple internal spaces collapsed
-- Error message (invalid):  
+- Error message (invalid):
   `Invalid name. Name must contain only letters, spaces, apostrophes or hyphens, and cannot be empty.`
 
 **ALIAS**
 - 1–50 characters per alias
 - Allowed characters: alphanumeric and spaces
 - Multiple aliases separated by commas (e.g. `a/Ah Boy, Johnny T`)
-- Error message (invalid):  
+- Error message (invalid):
   `Invalid alias. Alias must be non-empty and alphanumeric.`
 
 **STAGE** (case-insensitive)
@@ -158,7 +160,7 @@ Allowed values:
 - `arrested`
 - `closed`
 
-Error message (invalid):  
+Error message (invalid):
 `Invalid stage. Allowed values: surveillance, approached, cooperating, arrested, closed.`
 
 **RISK** (optional)
@@ -240,9 +242,9 @@ Records an interaction with a contact and appends it to the contact’s encounte
 `log 1 d/2026-02-21 t/18:30 l/Maxwell Road desc/Met at coffee shop out/Agreed to cooperate`
 
 #### Validation rules
-- DATE must be a valid calendar date  
+- DATE must be a valid calendar date
   Error: `Invalid date. Use format YYYY-MM-DD.`
-- TIME must be valid 24-hour `HH:mm`  
+- TIME must be valid 24-hour `HH:mm`
   Error: `Invalid time. Use 24-hour format HH:mm.`
 - DESCRIPTION cannot be blank; 1–500 characters
 
@@ -299,7 +301,36 @@ Displays the full profile of a contact and their chronological encounter history
 
 --------------------------------------------------------------------------------------------------------------------
 
-### 7) Search Contacts: `find`
+### 7) Set Reminder: `remind`
+
+Adds a reminder entry to a contact.
+
+**Format**
+`remind INDEX d/DATE t/TIME note/NOTE`
+
+**Parameters**
+- `INDEX` (compulsory): target contact in current list
+- `d/DATE` (compulsory): `YYYY-MM-DD`
+- `t/TIME` (compulsory): `HH:mm` (24-hour)
+- `note/NOTE` (compulsory): reminder text (not blank)
+
+**Examples**
+- `remind 1 d/2026-03-28 t/20:00 note/Meet informant`
+- `remind 2 d/2026-04-01 t/09:15 note/Follow up on statement`
+
+**Validation**
+- INDEX must exist in the current contact list.
+- DATE must be valid and use `YYYY-MM-DD`.
+- TIME must be valid and use 24-hour `HH:mm`.
+- NOTE cannot be blank.
+- Repeating `d/`, `t/`, or `note/` in the same command is not allowed.
+
+**Success output**
+`Reminder set for [Name] on [DATE] [TIME].`
+
+--------------------------------------------------------------------------------------------------------------------
+
+### 8) Search Contacts: `find`
 
 Retrieves contacts by keyword across multiple fields.
 
@@ -314,12 +345,12 @@ Retrieves contacts by keyword across multiple fields.
 - Case-insensitive
 - Partial match allowed
 - Matched fields: **Name**, **Alias**, **Notes**
-- If no matches:  
+- If no matches:
   `No contacts found matching the given keywords.`
 
 --------------------------------------------------------------------------------------------------------------------
 
-### 8) Export encounters to CSV: `export`
+### 9) Export encounters to CSV: `export`
 
 Exports all encounters whose **location** matches the value you give, to a UTF-8 CSV file. Rows are sorted by encounter date-time (earliest first).
 
@@ -346,7 +377,7 @@ Exports all encounters whose **location** matches the value you give, to a UTF-8
 
 --------------------------------------------------------------------------------------------------------------------
 
-### 9) Sort Contacts: `sort`
+### 10) Sort Contacts: `sort`
 
 Sorts the currently displayed contact list by a chosen criterion.
 
@@ -433,6 +464,7 @@ Delete Contact | `delete INDEX` | `delete 3`
 Log Encounter | `log INDEX d/DATE t/TIME l/LOCATION desc/DESCRIPTION [out/OUTCOME]` | `log 1 d/2026-02-21 t/18:30 l/Maxwell Road desc/Met...`
 Edit Encounter | `editencounter PERSON_INDEX ENCOUNTER_INDEX [d/DATE] [t/TIME] [l/LOCATION] [desc/DESCRIPTION] [out/OUTCOME]` | `editencounter 1 1 desc/Updated notes`
 View Contact | `view INDEX` | `view 1`
+Set Reminder | `remind INDEX d/DATE t/TIME note/NOTE` | `remind 1 d/2026-03-28 t/20:00 note/Meet informant`
 Search Contacts | `find KEYWORD [MORE_KEYWORDS]` | `find mike marina`
 Export encounters (CSV) | `export l/LOCATION` | `export l/Harbor District`
 Sort Contacts | `sort CRITERION` | `sort location`

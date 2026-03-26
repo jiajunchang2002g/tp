@@ -104,7 +104,8 @@ public class PersonTest {
                 + ", address=" + ALICE.getAddress() + ", stage=" + ALICE.getStage()
                 + ", aliases=" + ALICE.getAliases() + ", notes=" + ALICE.getNotes()
                 + ", risk=" + ALICE.getRisk() + ", tags=" + ALICE.getTags()
-                + ", encounters=" + ALICE.getEncounters() + "}";
+                + ", encounters=" + ALICE.getEncounters()
+                + ", reminders=" + ALICE.getReminders() + "}";
         assertEquals(expected, ALICE.toString());
     }
 }
