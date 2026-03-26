@@ -54,7 +54,9 @@ public class ExportCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        Path exportDir = Paths.get(System.getProperty("user.home"), "CrimeWatch", "reports");
+        // Export should be saved in the app home directory (same base as data/addressbook.json),
+        // so we write to "./exports/".
+        Path exportDir = Paths.get("exports");
         String timestamp = LocalDateTime.now().format(EXPORT_TIMESTAMP_FORMAT);
         Path exportFile = exportDir.resolve("CrimeWatch-export-" + timestamp + ".csv");
 
