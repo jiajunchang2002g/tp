@@ -44,6 +44,26 @@ Optional, contact-level password protection. Each contact can be protected with 
 | **Usage** | Add `pw/PASSWORD` to `add` or `edit` commands to protect; provide it with `view` to access |
 | **Validation** | Alphanumeric characters and spaces only |
 
+**Usage**
+
+```bash
+# Add contact with password protection
+add n/John Doe a/JD s/surveillance pw/password123
+
+# Update/remove password
+edit 1 pw/newpassword
+edit 1 pw/
+
+# View protected contact
+view 1 pw/password123
+view 1
+```
+
+**Behavior**
+- Without password: contact viewable normally.
+- With password: `view` requires correct password to display full details.
+- Passwords are stored in plain text (not production-ready).
+
 ## Command summary
 
 | Feature | Command format |
@@ -422,6 +442,8 @@ Sorts the currently displayed contact list by a chosen criterion.
 - `sort status`: sorts by stage/status alphabetically.
 - `sort recent`: sorts by most recently encountered first.
 - Ties are resolved by contact name in alphabetical order.
+
+--------------------------------------------------------------------------------------------------------------------
 
 ### Clearing all entries : `clear`
 
