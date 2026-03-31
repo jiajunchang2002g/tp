@@ -281,6 +281,39 @@ Command/model integration tests:
 Compatibility updates:
 - `Model` test stubs implement the new methods, e.g. in [`src/test/java/seedu/address/logic/commands/AddCommandTest.java`](../src/test/java/seedu/address/logic/commands/AddCommandTest.java)
 
+### Password Feature
+
+### Overview
+Optional, contact-level password protection. Each contact can be protected with a password to restrict viewing its full details.
+
+| Feature | Description |
+|---------|-------------|
+| **Scope** | Per-contact (individual contacts can be protected) |
+| **Type** | Optional (contacts don't require passwords) |
+| **Usage** | Add `pw/PASSWORD` to `add` or `edit` commands to protect; provide it with `view` to access |
+| **Validation** | Alphanumeric characters and spaces only |
+
+### Usage
+
+```bash
+# Add contact with password protection
+add n/John Doe p/98765432 e/john@example.com a/123 Main St s/suspect pw/password123
+
+# Update/remove password
+edit 1 pw/newpassword   # Change password
+edit 1 pw/              # Remove protection
+
+# View protected contact
+view 1 pw/password123   # Show full details if password correct
+view 1                  # Error: password required
+```
+
+### Behavior
+- **Without password**: Contact viewable normally
+- **With password**: `view` command requires correct password to display full details
+- **Plain text**: Passwords stored without encryption (not production-ready)
+
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
