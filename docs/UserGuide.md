@@ -38,7 +38,7 @@ No programming experience is required.
 
 ### Key Features
 
-CrimeWatch supports 11 core features: **Add**, **Edit**, **Delete** contacts | **Log** and **Edit** encounters | **View** contact details | **Set reminders** | **Search** by keywords | **Export** to CSV | **Sort** the contact list | **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
+CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts; **Log** and **Edit** encounters; **View** contact details; **Set reminders**; **Search** by keywords; **Export** to CSV; **Sort** the contact list; and **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
 
 ### Password Feature
 
@@ -102,15 +102,18 @@ view 1
 
 3. Move the `.jar` file into a folder you want to use as your CrimeWatch home folder.
   A new empty folder is recommended.
-  ![Moving .jar file to folder](images/MoveFile.gif)
+  ![Moving .jar file to folder](images/ug-move-to-home-folder.png)
 
-4. Open a terminal in that folder and run:
+4. Open a terminal in that folder:
+  ![Open Terminal from folder](images/ug-open-terminal.png)
+
+5. Run the command to launch the app:
 
    ```bash
    java -jar crimewatch.jar
    ```
 
-   ![Opening the .jar file](images/OpenFile.gif)
+   ![Opening the .jar file](images/ug-terminal-command.png)
 
 5. Confirm the app opens and sample data is visible.
    ![Ui](images/Ui.png)
