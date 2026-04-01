@@ -6,6 +6,8 @@ title: User Guide
 * Table of Contents
 {:toc}
 
+<div style="page-break-after: always;"></div>
+
 ## What is CrimeWatch?
 
 CrimeWatch is a **desktop contact tracking application** designed specifically for **law enforcement undercover agents and investigators** to manage suspect profiles and investigation encounters. Instead of carrying physical notebooks or risky digital records on your phone, CrimeWatch allows you to securely and efficiently track suspects, their aliases, risk levels, and encounter history by entering typed commands in the app.
