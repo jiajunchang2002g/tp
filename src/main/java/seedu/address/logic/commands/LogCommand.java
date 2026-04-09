@@ -95,6 +95,7 @@ public class LogCommand extends Command {
         var notes = personToLog.getNotes();
         var risk = personToLog.getRisk();
         var tags = personToLog.getTags();
+        var password = personToLog.getPassword();
 
         return new Person(
                 name,
@@ -106,7 +107,8 @@ public class LogCommand extends Command {
                 notes,
                 risk,
                 tags,
-                updatedEncounters);
+                updatedEncounters,
+                password);
     }
 
     @Override
