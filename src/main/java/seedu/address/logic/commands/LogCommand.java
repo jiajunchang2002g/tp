@@ -72,24 +72,46 @@ public class LogCommand extends Command {
         List<Encounter> updatedEncounters = new ArrayList<>(personToLog.getEncounters());
         updatedEncounters.add(encounter);
 
-        Person updatedPerson = new Person(
-                personToLog.getName(),
-                personToLog.getPhone(),
-                personToLog.getEmail(),
-                personToLog.getAddress(),
-                personToLog.getStage(),
-                personToLog.getAliases(),
-                personToLog.getNotes(),
-                personToLog.getRisk(),
-                personToLog.getTags(),
-                updatedEncounters);
+        Person updatedPerson = createLoggedPerson(personToLog, updatedEncounters);
 
         model.setPerson(personToLog, updatedPerson);
 
         return new CommandResult(
                 String.format(MESSAGE_SUCCESS,
                         personToLog.getName(),
-                        encounter.getFormattedDateTime()));
+                        encounter.getFormattedDateTime()),
+                updatedPerson);
+    }
+
+    /**
+     * Rebuilds the logged contact with updated encounter history.
+     */
+    private Person createLoggedPerson(Person personToLog, List<Encounter> updatedEncounters) {
+        var name = personToLog.getName();
+        var phone = personToLog.getPhone();
+        var email = personToLog.getEmail();
+        var address = personToLog.getAddress();
+        var stage = personToLog.getStage();
+        var aliases = personToLog.getAliases();
+        var notes = personToLog.getNotes();
+        var risk = personToLog.getRisk();
+        var tags = personToLog.getTags();
+        var reminders = personToLog.getReminders();
+        var password = personToLog.getPassword();
+
+        return new Person(
+                name,
+                phone,
+                email,
+                address,
+                stage,
+                aliases,
+                notes,
+                risk,
+                tags,
+                updatedEncounters,
+                reminders,
+                password);
     }
 
     @Override

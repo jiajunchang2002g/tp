@@ -10,13 +10,15 @@ import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
 /**
- * Finds and lists all persons in CrimeWatch whose name or tags match the supplied criteria.
+ * Finds and lists all persons in CrimeWatch whose names, aliases,
+ * or tags match the supplied criteria.
  */
 public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose names contain any of "
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Finds all persons whose names or aliases contain any of "
             + "the specified keywords (case-insensitive) and/or whose tags match any of the specified tags, and "
             + "displays them as a list with index numbers.\n"
             + "Parameters: [NAME_KEYWORD]... [t/TAG]...\n"

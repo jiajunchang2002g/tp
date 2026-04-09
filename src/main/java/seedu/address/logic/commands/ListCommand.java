@@ -18,7 +18,15 @@ public class ListCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        showAllPersons(model);
         return new CommandResult(MESSAGE_SUCCESS);
+    }
+
+    /**
+     * Restores the list view to show all persons.
+     */
+    private void showAllPersons(Model model) {
+        model.clearPersonSortComparator();
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 }

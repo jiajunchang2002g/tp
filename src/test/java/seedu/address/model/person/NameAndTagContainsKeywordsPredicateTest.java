@@ -41,6 +41,7 @@ public class NameAndTagContainsKeywordsPredicateTest {
         NameAndTagContainsKeywordsPredicate predicate = new NameAndTagContainsKeywordsPredicate(
                 Collections.singletonList("Alice"), Collections.emptySet());
         assertTrue(predicate.test(new PersonBuilder().withName("Alice Bob").build()));
+        assertTrue(predicate.test(new PersonBuilder().withName("Bob").withAliases("Alice Fox").build()));
         assertFalse(predicate.test(new PersonBuilder().withName("Bob").build()));
     }
 

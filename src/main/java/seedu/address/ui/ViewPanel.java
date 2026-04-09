@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javafx.fxml.FXML;
@@ -146,9 +147,12 @@ public class ViewPanel extends UiPart<Region> {
             return;
         }
 
-        for (int i = encounters.size() - 1; i >= 0; i--) {
-            Encounter enc = encounters.get(i);
-            VBox card = buildEncounterCard(enc, encounters.size() - i);
+        List<Encounter> sortedEncounters = new ArrayList<>(encounters);
+        sortedEncounters.sort(Comparator.comparing((Encounter encounter) -> encounter.dateTime).reversed());
+
+        for (int i = 0; i < sortedEncounters.size(); i++) {
+            Encounter enc = sortedEncounters.get(i);
+            VBox card = buildEncounterCard(enc, i + 1);
             encounterBox.getChildren().add(card);
         }
     }

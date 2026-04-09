@@ -101,6 +101,19 @@ Design notes:
 
 > **UML Placeholder**: Replace `diagrams/LogicClassDiagram.png` with the rendered output of `docs/diagrams/LogicClassDiagram.puml`.
 
+The diagram above treats concrete command types as `XYZCommand` to keep the high-level view compact.
+The following class diagram zooms into that placeholder and shows the concrete command hierarchy, together
+with key command-specific collaborators and multiplicities:
+
+<img src="images/CommandFeatureClassDiagram.png" width="900"/>
+
+The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+
+![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
+
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
+</div>
+
 The `Logic` component processes command text in this pipeline:
 1. `LogicManager.execute(String)` receives raw input.
 2. `AddressBookParser` determines command word and delegates to command-specific parser.
@@ -191,11 +204,27 @@ This section documents key implementation decisions for major CrimeWatch feature
 * required: `n/`, `p/`, `e/`, `a/`, `s/`
 * optional: `al/`, `note/`, `r/`, `pw/`, `t/`
 
-#### Diagram placeholder
+#### Command format
 
-> **UML Placeholder**: Add a sequence diagram image at `diagrams/AddSequenceDiagram.png` (rendered from `docs/diagrams/AddSequenceDiagram.puml`).
+The current `add` command format is:
 
-#### Implementation
+`add n/NAME p/PHONE e/EMAIL a/ADDRESS s/STAGE [al/ALIAS(,ALIAS...)] [note/NOTES] [r/RISK] [pw/PASSWORD] [t/TAG]...`
+
+Required fields:
+- `n/` name
+- `p/` phone
+- `e/` email
+- `a/` address
+- `s/` stage
+
+Optional fields:
+- `al/` aliases (comma-separated)
+- `note/` notes
+- `r/` risk (defaults to `medium`)
+- `pw/` password (contact-level protection)
+- `t/` tags (repeatable)
+
+#### Parsing flow
 
 `AddCommandParser`:
 * tokenizes input by supported prefixes.
@@ -207,110 +236,126 @@ This section documents key implementation decisions for major CrimeWatch feature
 * checks duplicate identity via `model.hasPerson(toAdd)`.
 * inserts via `model.addPerson(toAdd)`.
 
-#### Rationale and trade-off
+Key parser behavior:
+- Rejects missing required prefixes with `MESSAGE_INVALID_COMMAND_FORMAT`.
+- Uses `verifyNoDuplicatePrefixesFor(...)` for `n/`, `p/`, `e/`, `a/`, `al/`, `note/`, `r/`, `pw/`, `s/`.
+- Parses aliases via `ParserUtil.parseAliases(...)`; empty alias payload is rejected.
+- Applies default risk via `Risk.getDefault()` when `r/` is omitted.
+- Parses tags from all `t/` occurrences into a `Set<Tag>`.
 
-* Prefix parsing keeps command input extensible and consistent with other commands.
-* Strong upfront parser validation improves error specificity but increases parser complexity.
+#### Field constraints
 
----
+Validation is enforced in model/value objects and parser utilities:
+- `Name`: alphanumeric + spaces, non-blank.
+- `Phone`: digits only, at least 3 digits.
+- `Email`: must satisfy email format constraints.
+- `Address`: non-blank.
+- `Alias`: trimmed, 1-50 chars, alphanumeric + spaces.
+- `Stage`: one of `surveillance`, `approached`, `cooperating`, `arrested`, `closed`.
+- `Notes`: optional text, max 500 chars, no newlines.
+- `Risk`: one of `low`, `medium`, `high` (case-insensitive parser).
+- `Password`: alphanumeric + spaces, non-blank when provided.
+- `Tag`: alphanumeric.
 
-### Password-protected contact behavior
-
-#### Overview
-
-CrimeWatch supports optional contact-level passwords (`pw/`) for controlled access to sensitive operations.
-
-Current behavior:
-* `view`, `edit`, `log`, `remind` enforce password checks for protected contacts.
-* For unprotected contacts, `log` and `remind` reject unexpected `pw/`.
-* Passwords are stored as plain text in current implementation.
-
-![View/Password Sequence Diagram](diagrams/ViewPasswordSequenceDiagram.png)
-
-> **UML Placeholder**: Add image `diagrams/ViewPasswordSequenceDiagram.png` (rendered from `docs/diagrams/ViewPasswordSequenceDiagram.puml`).
-
-#### Rationale and trade-off
-
-* Contact-level protection provides lightweight operational gating without requiring a global login.
-* Plain-text storage keeps implementation simple for educational scope, but is not suitable for production security requirements.
-
----
-
-### Encounter logging and editing
-
-#### Overview
-
-Encounter workflow is split into:
-* `log`: append a new encounter.
-* `editencounter`: modify an existing encounter by person and encounter index.
-
-`log` captures date, time, location, description, and optional outcome.
-
-![Log Encounter Sequence Diagram](diagrams/LogSequenceDiagram.png)
-
-> **UML Placeholder**: Add image `diagrams/LogSequenceDiagram.png` (rendered from `docs/diagrams/LogSequenceDiagram.puml`).
-
-#### Implementation notes
-
-* `LogCommandParser` validates required prefixes and duplicate constraints.
-* `LogCommand` performs optional password gating and reconstructs updated `Person` while preserving existing fields.
-* `EditEncounterCommand` updates a specific encounter entry and validates both indices.
-
-#### Rationale and trade-off
-
-* Keeping encounters nested under `Person` simplifies retrieval and export by contact.
-* Person reconstruction is explicit and safe, but increases the chance of accidental field omission when model schema changes.
-
----
-
-### Reminder feature
-
-#### Overview
-
-`remind` appends reminder entries (`date`, `time`, `note`) to a contact.
-
-![Remind Sequence Diagram](diagrams/RemindSequenceDiagram.png)
-
-> **UML Placeholder**: Add image `diagrams/RemindSequenceDiagram.png` (rendered from `docs/diagrams/RemindSequenceDiagram.puml`).
-
-#### Implementation notes
-
-* `RemindCommandParser` validates required prefixes and duplicate constraints.
-* `RemindCommand` applies the same protection model as other sensitive commands.
-* `ModelManager.addReminderToContact(...)` sorts reminders chronologically after insertion.
-
-#### Rationale and trade-off
-
-* Chronological sorting at insertion-time ensures consistent ordering across views.
-* Sorting on each insertion is simple and adequate for target data sizes.
-
----
+Relevant classes:
+- [`src/main/java/seedu/address/logic/parser/ParserUtil.java`](../src/main/java/seedu/address/logic/parser/ParserUtil.java)
+- [`src/main/java/seedu/address/model/person/Name.java`](../src/main/java/seedu/address/model/person/Name.java)
+- [`src/main/java/seedu/address/model/person/Phone.java`](../src/main/java/seedu/address/model/person/Phone.java)
+- [`src/main/java/seedu/address/model/person/Email.java`](../src/main/java/seedu/address/model/person/Email.java)
+- [`src/main/java/seedu/address/model/person/Address.java`](../src/main/java/seedu/address/model/person/Address.java)
+- [`src/main/java/seedu/address/model/person/Alias.java`](../src/main/java/seedu/address/model/person/Alias.java)
+- [`src/main/java/seedu/address/model/person/Stage.java`](../src/main/java/seedu/address/model/person/Stage.java)
+- [`src/main/java/seedu/address/model/person/Notes.java`](../src/main/java/seedu/address/model/person/Notes.java)
+- [`src/main/java/seedu/address/model/person/Risk.java`](../src/main/java/seedu/address/model/person/Risk.java)
+- [`src/main/java/seedu/address/model/person/Password.java`](../src/main/java/seedu/address/model/person/Password.java)
+- [`src/main/java/seedu/address/model/tag/Tag.java`](../src/main/java/seedu/address/model/tag/Tag.java)
 
 ### Sort feature
 
 #### Overview
 
-`sort` applies a comparator over the displayed list using one criterion:
-* `alphabetical`, `status`, `tag`, `location`, `recent`
+The `sort` feature reorders the currently displayed contact list by a selected criterion:
+- `location`
+- `tag`
+- `alphabetical`
+- `status`
+- `recent`
 
-This is a view-level sort; it does not mutate persisted data order.
+This is implemented as a **view-level sort**. It does not mutate persisted `AddressBook` ordering in storage.
 
-![Sort Activity Diagram](diagrams/SortActivityDiagram.png)
+#### Command flow
 
-> **UML Placeholder**: Add image `diagrams/SortActivityDiagram.png` (rendered from `docs/diagrams/SortActivityDiagram.puml`).
+1. User enters `sort CRITERION`.
+2. `AddressBookParser` routes the command word `sort` to `SortCommandParser`.
+3. `SortCommandParser` validates that there is exactly one token and maps it to `SortCriterion`.
+4. `SortCommand#execute(Model)` calls `model.setPersonSortComparator(...)` with the criterion comparator.
+5. UI updates automatically because it is bound to `Model#getFilteredPersonList()`.
 
-#### Implementation notes
+Key classes:
+- [`src/main/java/seedu/address/logic/parser/AddressBookParser.java`](../src/main/java/seedu/address/logic/parser/AddressBookParser.java)
+- [`src/main/java/seedu/address/logic/parser/SortCommandParser.java`](../src/main/java/seedu/address/logic/parser/SortCommandParser.java)
+- [`src/main/java/seedu/address/logic/commands/SortCommand.java`](../src/main/java/seedu/address/logic/commands/SortCommand.java)
 
-* `SortCommandParser` enforces single-token criterion validation.
-* `SortCommand` updates comparator via `model.setPersonSortComparator(...)`.
-* `ModelManager` exposes `SortedList<Person>` to UI through `getFilteredPersonList()`.
+#### Model integration
 
-#### Rationale and trade-off
+Sorting support is added to the `Model` API:
+- `setPersonSortComparator(Comparator<Person>)`
+- `clearPersonSortComparator()`
 
-* View-level sorting avoids destructive reordering and interacts cleanly with filtering.
-* Comparator logic for derived fields (latest encounter location/time, smallest tag) is more complex but gives users practical sorting options.
+`ModelManager` now keeps:
+- `FilteredList<Person> filteredPersons` for filtering
+- `SortedList<Person> sortedPersons` wrapping `filteredPersons` for sorting
+
+`getFilteredPersonList()` returns `sortedPersons`, so existing UI wiring works without extra UI changes.
+
+Key classes:
+- [`src/main/java/seedu/address/model/Model.java`](../src/main/java/seedu/address/model/Model.java)
+- [`src/main/java/seedu/address/model/ModelManager.java`](../src/main/java/seedu/address/model/ModelManager.java)
+
+#### Comparator behavior
+
+Implemented in `SortCommand.SortCriterion`:
+- `alphabetical`: by `Person#getName()`
+- `status`: by `Person#getStage().toString()`, then by name
+- `tag`: by alphabetically smallest tag name, nulls last, then by name
+- `location`: by latest encounter location, normalized (trim + collapse spaces), nulls last, then by name
+- `recent`: by latest encounter datetime descending (most recent first), then by name
+
+For contacts with missing values (e.g., no encounters/no tags), comparators use `nullsLast(...)` so they appear at the end for those criteria.
+
+#### Defensive parsing and validation
+
+`SortCommandParser` rejects:
+- missing criterion
+- multiple tokens
+- unsupported criterion
+
+All invalid forms throw `ParseException` with `MESSAGE_INVALID_COMMAND_FORMAT` and command usage.
+
+#### Tests
+
+Parser tests:
+- [`src/test/java/seedu/address/logic/parser/SortCommandParserTest.java`](../src/test/java/seedu/address/logic/parser/SortCommandParserTest.java)
+- registration coverage in [`src/test/java/seedu/address/logic/parser/AddressBookParserTest.java`](../src/test/java/seedu/address/logic/parser/AddressBookParserTest.java)
+
+Command/model integration tests:
+- [`src/test/java/seedu/address/logic/commands/SortCommandTest.java`](../src/test/java/seedu/address/logic/commands/SortCommandTest.java)
+
+Compatibility updates:
+- `Model` test stubs implement the new methods, e.g. in [`src/test/java/seedu/address/logic/commands/AddCommandTest.java`](../src/test/java/seedu/address/logic/commands/AddCommandTest.java)
 
 ---
+
+### Log command
+
+The `log` command appends a new encounter to the selected contact in the current displayed list. After validating the target index against `Model#getFilteredPersonList()`, `LogCommand#execute(Model)` copies the contact's existing encounters, appends the new `Encounter`, rebuilds the `Person`, and calls `model.setPerson(...)`.
+
+The reconstructed `Person` preserves all unrelated fields, including reminders and password, while updating only the encounter history. The returned `CommandResult` includes the updated person so the UI can continue showing the refreshed profile.
+
+Key classes:
+- [`src/main/java/seedu/address/logic/commands/LogCommand.java`](../src/main/java/seedu/address/logic/commands/LogCommand.java)
+- [`src/main/java/seedu/address/model/person/Encounter.java`](../src/main/java/seedu/address/model/person/Encounter.java)
+- [`src/main/java/seedu/address/model/person/Person.java`](../src/main/java/seedu/address/model/person/Person.java)
 
 ### Export encounters to CSV
 
@@ -319,20 +364,170 @@ This is a view-level sort; it does not mutate persisted data order.
 `export l/LOCATION` writes encounters at the specified location to:
 `exports/CrimeWatch-export-<timestamp>.csv`.
 
-![Export Sequence Diagram](diagrams/ExportSequenceDiagram.png)
-
-> **UML Placeholder**: Add image `diagrams/ExportSequenceDiagram.png` (rendered from `docs/diagrams/ExportSequenceDiagram.puml`).
-
 #### Implementation notes
 
-* `ExportCommandParser` validates location input.
-* `ExportCommand` scans contacts and encounters, filters by location, and writes rows to a CSV file.
-* output directory is created if missing.
+* `ExportCommandParser` validates the required `l/LOCATION` input.
+* `ExportCommand` scans the canonical address book via `model.getAddressBook().getPersonList()`, so export is independent of the current filtered or sorted UI view.
+* Matching is case-insensitive after trimming surrounding whitespace.
+* Matching encounters are converted into CSV rows, sorted by encounter datetime, and written to `./exports/`.
+* The output directory is created automatically if it does not already exist.
 
 #### Rationale and trade-off
 
 * CSV is easy to inspect and import into reporting tools.
-* Exact location filtering keeps behavior predictable; partial/fuzzy matching is deferred for future enhancement.
+* Exact location matching keeps export behavior predictable, while case-insensitive comparison remains forgiving for user input.
+
+### Password Feature
+
+### Overview
+Optional, contact-level password protection. Each contact can be protected with a password to restrict viewing its full details.
+
+| Feature | Description |
+|---------|-------------|
+| **Scope** | Per-contact (individual contacts can be protected) |
+| **Type** | Optional (contacts don't require passwords) |
+| **Usage** | Add `pw/PASSWORD` to `add` or `edit` commands to protect; provide it with `view` to access |
+| **Validation** | Alphanumeric characters and spaces only |
+
+### Usage
+
+```bash
+# Add contact with password protection
+add n/John Doe p/98765432 e/john@example.com a/123 Main St s/surveillance pw/password123
+
+# Update/remove password
+edit 1 pw/newpassword   # Change password
+edit 1 pw/              # Remove protection
+```
+
+### View protected contact
+view 1 pw/password123   # Show full details if password correct
+view 1                  # Error: password required
+
+### Behavior
+- **Without password**: Contact viewable normally
+- **With password**: `view` command requires correct password to display full details
+- **Plain text**: Passwords stored without encryption (not production-ready)
+
+### Sequence Diagram
+
+The following sequence diagram shows how the `view` command processes a password-protected contact:
+
+![View Protected Contact Sequence Diagram](images/ViewProtectedContactSequenceDiagram.png)
+
+### Remind command
+
+The `remind` command resolves its target using the same filtered and sorted contact list currently shown to the user. This is important because `ModelManager#getFilteredPersonList()` returns `sortedPersons`, so the displayed index must be interpreted against the sorted view rather than the raw address book order.
+
+The command first performs bounds checking against the displayed list in `RemindCommand#execute(Model)`, then delegates the actual update to `Model#addReminderToContact(Index, Reminder)`. `ModelManager` retrieves the target from `sortedPersons`, copies the existing reminder list, adds the new reminder, sorts the updated reminders chronologically, and rebuilds the `Person` before calling `setPerson(...)`.
+
+![Remind Command Sequence Diagram](images/RemindSequenceDiagram.png)
+
+Key classes:
+- [`src/main/java/seedu/address/logic/commands/RemindCommand.java`](../src/main/java/seedu/address/logic/commands/RemindCommand.java)
+- [`src/main/java/seedu/address/model/Model.java`](../src/main/java/seedu/address/model/Model.java)
+- [`src/main/java/seedu/address/model/ModelManager.java`](../src/main/java/seedu/address/model/ModelManager.java)
+
+### Edit Encounter command
+
+The `editencounter` command uses two indices: `PERSON_INDEX` identifies the contact in the displayed contact list, while `ENCOUNTER_INDEX` refers to the encounter cards shown in `view`. The UI renders those encounter cards in reverse-chronological order, so display index `1` refers to the most recent encounter rather than the first element stored in the underlying encounter list.
+
+To preserve that user-facing numbering, `EditEncounterCommand#execute(Model)` converts the displayed encounter index back into the stored zero-based index using `existingEncounters.size() - encounterDisplayOneBased`. It then replaces only the selected encounter in a copied list and rebuilds the `Person` with the updated encounters while preserving other fields such as reminders and password protection.
+
+![Edit Encounter Sequence Diagram](images/EditEncounterSequenceDiagram.png)
+
+Key classes:
+- [`src/main/java/seedu/address/logic/commands/EditEncounterCommand.java`](../src/main/java/seedu/address/logic/commands/EditEncounterCommand.java)
+- [`src/main/java/seedu/address/ui/ViewPanel.java`](../src/main/java/seedu/address/ui/ViewPanel.java)
+- [`src/main/java/seedu/address/model/person/Person.java`](../src/main/java/seedu/address/model/person/Person.java)
+
+### \[Proposed\] Undo/redo feature
+
+#### Proposed Implementation
+
+The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
+
+* `VersionedAddressBook#commit()` — Saves the current address book state in its history.
+* `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
+* `VersionedAddressBook#redo()` — Restores a previously undone address book state from its history.
+
+These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
+
+Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
+
+Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
+
+![UndoRedoState0](images/UndoRedoState0.png)
+
+Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
+
+![UndoRedoState1](images/UndoRedoState1.png)
+
+Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
+
+![UndoRedoState2](images/UndoRedoState2.png)
+
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
+
+</div>
+
+Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
+
+![UndoRedoState3](images/UndoRedoState3.png)
+
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
+than attempting to perform the undo.
+
+</div>
+
+The following sequence diagram shows how an undo operation goes through the `Logic` component:
+
+![UndoSequenceDiagram](images/UndoSequenceDiagram-Logic.png)
+
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
+
+</div>
+
+Similarly, how an undo operation goes through the `Model` component is shown below:
+
+![UndoSequenceDiagram](images/UndoSequenceDiagram-Model.png)
+
+The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
+
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
+
+</div>
+
+Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
+
+![UndoRedoState4](images/UndoRedoState4.png)
+
+Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
+
+![UndoRedoState5](images/UndoRedoState5.png)
+
+The following activity diagram summarizes what happens when a user executes a new command:
+
+<img src="images/CommitActivityDiagram.png" width="250" />
+
+#### Design considerations:
+
+**Aspect: How undo & redo executes:**
+
+* **Alternative 1 (current choice):** Saves the entire CrimeWatch data.
+  * Pros: Easy to implement.
+  * Cons: May have performance issues in terms of memory usage.
+
+* **Alternative 2:** Individual command knows how to undo/redo by
+  itself.
+  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
+  * Cons: We must ensure that the implementation of each individual command are correct.
+
+_{more aspects and alternatives to be added}_
+
+### \[Proposed\] Data archiving
+
+_{Explain here how the data archiving feature will be implemented}_
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -363,21 +558,116 @@ CrimeWatch helps officers manage and retrieve operational contact information qu
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a ... | I want to ... | So that I can ... |
-| --- | --- | --- | --- |
-| `* * *` | officer | add/edit/delete contacts | keep contact records current |
-| `* * *` | officer | find contacts quickly | retrieve details under pressure |
-| `* * *` | officer | log encounters | maintain a factual history |
-| `* * *` | officer | view full profiles | see complete case context quickly |
-| `* *` | officer | protect selected contacts with passwords | reduce casual unauthorized access |
-| `* *` | officer | edit encounter entries | correct mistakes in logs |
-| `* *` | officer | sort contact list by operational criteria | prioritize follow-ups efficiently |
-| `* *` | officer | export encounters by location | prepare external reporting artifacts |
-| `*` | officer | set reminders | avoid missing important follow-up actions |
+| Priority | As a …​                                 | I want to …​                                            | So that I can…​                                                              |
+| -------- | --------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `* * *`  | undercover officer                      | create contact profiles                                 | keep all suspect details organised in one secure place                       |
+| `* * *`  | undercover officer                      | log encounters immediately after they happen            | preserve accurate details while they are still fresh                         |
+| `* * *`  | undercover officer                      | search contacts by name and tag                          | retrieve critical information quickly under time pressure                    |
+| `* * *`  | undercover officer                      | update contact profiles                                 | keep their information up to date                                            |
+| `* * *`  | undercover officer                      | delete contact profiles                                 | remove any profile if no longer required                                     |
+| `* * *`  | undercover officer                      | record aliases and multiple identifiers for a contact   | track individuals who use different identities                               |
+| `* * *`  | undercover officer                      | add an email address to a contact                       | contact them via email if needed                                             |
+| `* *`    | undercover officer                      | link contacts to each other                             | understand relationship networks within an investigation                     |
+| `* *`    | undercover officer                      | tag contacts with statuses (active, inactive, high risk)| prioritise follow-ups effectively                                            |
+| `* *`    | undercover officer                      | view a chronological timeline of interactions           | understand the progression of a case at a glance                             |
+| `* *`    | undercover officer                      | attach notes and contextual observations to a contact   | capture nuances that may not appear in formal reports                        |
+| `* *`    | undercover officer                      | quickly edit or update a contact's risk level           | reflect changes in behaviour or threat level                                 |
+| `* *`    | undercover officer                      | filter contacts by case or operation                    | focus only on relevant information                                           |
+| `* *`    | undercover officer                      | log the location of each encounter                      | identify geographic patterns in suspect activity                             |
+| `* *`    | undercover officer                      | log outcomes of interactions                            | track whether objectives were achieved                                       |
+| `* *`    | undercover officer with many contacts   | group contacts (e.g. Case 1, Case 2)                    | organise my contacts more easily                                             |
+| `*`      | undercover officer                      | mark follow-up reminders                                | ensure important leads are not forgotten                                     |
+| `*`      | undercover officer                      | upload images and supporting documents of a contact     | make relevant images and docs easily accessible                              |
+| `*`      | undercover officer                      | create a password to encrypt data on disk               | ensure my data won't get stolen if my machine is compromised                 |
+| `*`      | undercover officer                      | view all encounter locations on a map                   | see how territories are related                                              |
+| `*`      | undercover officer                      | export selected case information securely               | prepare formal reports efficiently                                           |
+| `*`      | undercover officer                      | view relationship maps between contacts                 | identify key influencers or central figures in a network                     |
+| `*`      | forgetful undercover officer            | set a reminder time for a contact                       | remember to call or follow up at the right time                              |
 
 ### Use cases
 
 (For all use cases below, the **System** is `CrimeWatch` and the **Actor** is the `officer`.)
+
+**Use case: Delete a person**
+
+**MSS**
+1. User requests to list persons.
+2. CrimeWatch shows a list of contacts.
+3. User requests to delete a specific person in the list.
+4. CrimeWatch deletes the contact.
+
+   Use case ends.
+
+**Extensions**
+* 2a. The list is empty.
+
+  Use case ends.
+
+* 3a. The given index is invalid.
+
+  * 3a1. CrimeWatch shows an error message.
+
+    Use case resumes at step 2.
+
+**Use case: Edit a person**
+
+**MSS**
+1. User requests to list persons.
+2. CrimeWatch shows a list of contacts.
+3. User requests to edit a specific person in the list with one or more fields.
+4. CrimeWatch updates only the provided fields for that contact.
+
+   Use case ends.
+
+**Extensions**
+* 2a. The list is empty.
+
+  Use case ends.
+
+* 3a. The given index is invalid.
+
+  * 3a1. CrimeWatch shows an error message.
+
+    Use case resumes at step 2.
+
+* 3b. No editable field is provided.
+
+  * 3b1. CrimeWatch shows an error message.
+
+    Use case resumes at step 2.
+
+**Use case: Edit an encounter**
+
+**MSS**
+1. User requests to view a contact profile.
+2. CrimeWatch shows encounter cards with encounter indices.
+3. User requests to edit a specific encounter using `PERSON_INDEX` and `ENCOUNTER_INDEX`.
+4. CrimeWatch updates only the provided encounter fields.
+
+   Use case ends.
+
+**Extensions**
+* 2a. The contact has no encounters.
+
+  Use case ends.
+
+* 3a. The given person index is invalid.
+
+  * 3a1. CrimeWatch shows an error message.
+
+    Use case resumes at step 2.
+
+* 3b. The given encounter index is invalid.
+
+  * 3b1. CrimeWatch shows an error message.
+
+    Use case resumes at step 2.
+
+* 3c. No editable field is provided.
+
+  * 3c1. CrimeWatch shows an error message.
+
+    Use case resumes at step 2.
 
 **Use case: View a protected contact**
 
@@ -412,8 +702,6 @@ Use case ends.
   * 1a1. System shows an error message.
 * 2a. Required fields are missing/invalid.  
   * 2a1. System shows an error message.
-* 2b. Contact is protected and password is missing/incorrect.  
-  * 2b1. System shows an error message.
 
 ### Non-Functional Requirements
 
@@ -470,6 +758,17 @@ Given below are manual tests for major functional paths and edge cases.
    1. Test case: `edit 1 n/New Name`
    1. Expected: command rejected; password required message shown.
 
+### Deleting a person
+
+1. Deleting a person while all persons are being shown
+   1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
+   1. Test case: `delete 1`
+      Expected: First contact is deleted from the list. Details of the deleted contact are shown in the status message. Timestamp in the status bar is updated.
+   1. Test case: `delete 0`
+      Expected: No person is deleted. Error details are shown in the status message. Status bar remains the same.
+   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)
+      Expected: Similar to previous.
+
 ### View and password protection
 
 1. View protected contact with correct password
@@ -514,3 +813,7 @@ Given below are manual tests for major functional paths and edge cases.
    1. Add or edit a contact.
    1. Exit and relaunch app.
    1. Expected: changes persist across restart.
+
+3. Dealing with missing/corrupted data files
+   1. Corrupt or remove the data file, then relaunch the app.
+   1. Expected: the app handles the read failure gracefully and reports a clear error instead of crashing silently.

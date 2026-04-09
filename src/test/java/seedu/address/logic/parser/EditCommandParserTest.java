@@ -12,6 +12,7 @@ import static seedu.address.logic.commands.CommandTestUtil.RISK_DESC_LOW;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_AMY;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ALIAS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_RISK;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
@@ -149,5 +150,13 @@ public class EditCommandParserTest {
         String userInput = targetIndex.getOneBased() + RISK_DESC_LOW + RISK_DESC_HIGH;
         assertParseFailure(parser, userInput,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_RISK));
+    }
+
+    @Test
+    public void parse_blankAlias_failure() {
+        Index targetIndex = INDEX_FIRST_PERSON;
+        String userInput = targetIndex.getOneBased() + " " + PREFIX_ALIAS;
+
+        assertParseFailure(parser, userInput, seedu.address.model.person.Alias.MESSAGE_CONSTRAINTS);
     }
 }

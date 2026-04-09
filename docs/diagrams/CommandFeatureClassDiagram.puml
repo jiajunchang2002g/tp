@@ -1,0 +1,67 @@
+@startuml
+!pragma layout smetana
+!include style.puml
+skinparam arrowThickness 1.1
+skinparam arrowColor LOGIC_COLOR_T4
+skinparam classBackgroundColor LOGIC_COLOR
+
+package Logic {
+Class "{abstract}\nCommand" as Command
+Class CommandResult
+
+Class AddCommand
+Class EditCommand
+Class DeleteCommand
+Class ViewCommand
+Class LogCommand
+Class EditEncounterCommand
+Class RemindCommand
+Class FindCommand
+Class SortCommand
+Class ExportCommand
+Class ListCommand
+Class ClearCommand
+Class HelpCommand
+Class ExitCommand
+
+Class "EditCommand.EditPersonDescriptor" as EditPersonDescriptor
+Class "EditEncounterCommand.EditEncounterDescriptor" as EditEncounterDescriptor
+Class "<<enumeration>>\nSortCriterion" as SortCriterion
+Class "Predicate<Person>" as PersonPredicate
+}
+
+package Model {
+Class "<<interface>>\nModel" as Model
+Class Person
+Class Encounter
+Class Reminder
+}
+
+AddCommand -up-|> Command
+EditCommand -up-|> Command
+DeleteCommand -up-|> Command
+ViewCommand -up-|> Command
+LogCommand -up-|> Command
+EditEncounterCommand -up-|> Command
+RemindCommand -up-|> Command
+FindCommand -up-|> Command
+SortCommand -up-|> Command
+ExportCommand -up-|> Command
+ListCommand -up-|> Command
+ClearCommand -up-|> Command
+HelpCommand -up-|> Command
+ExitCommand -up-|> Command
+
+EditCommand *--> "1" EditPersonDescriptor : descriptor
+EditEncounterCommand *--> "1" EditEncounterDescriptor : descriptor
+SortCommand *--> "1" SortCriterion : criterion
+FindCommand --> "1" PersonPredicate : predicate
+AddCommand --> "1" Person : toAdd
+LogCommand --> "1" Encounter : encounter
+RemindCommand --> "1" Reminder : reminder
+
+Command .down.> Model : execute(model)
+Command .left.> CommandResult : <<create>>
+ViewCommand ..> Person : returned in
+
+@enduml

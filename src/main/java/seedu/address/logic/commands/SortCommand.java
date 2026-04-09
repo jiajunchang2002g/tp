@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.Model;
+import seedu.address.model.person.Encounter;
 import seedu.address.model.person.Person;
 
 /**
@@ -143,11 +144,9 @@ public class SortCommand extends Command {
         }
 
         private static String getLatestEncounterLocation(Person person) {
-            if (person.getEncounters().isEmpty()) {
-                return null;
-            }
-            String latestLocation = person.getEncounters().get(person.getEncounters().size() - 1).location;
-            return normalizeLocationForSort(latestLocation);
+            return getLatestEncounter(person)
+                    .map(encounter -> normalizeLocationForSort(encounter.location))
+                    .orElse(null);
         }
 
         private static String getSmallestTagName(Person person) {
@@ -158,9 +157,14 @@ public class SortCommand extends Command {
         }
 
         private static LocalDateTime getLatestEncounterTime(Person person) {
-            return person.getEncounters().isEmpty()
-                    ? null
-                    : person.getEncounters().get(person.getEncounters().size() - 1).dateTime;
+            return getLatestEncounter(person)
+                    .map(encounter -> encounter.dateTime)
+                    .orElse(null);
+        }
+
+        private static Optional<Encounter> getLatestEncounter(Person person) {
+            return person.getEncounters().stream()
+                    .max(Comparator.comparing(encounter -> encounter.dateTime));
         }
 
         /**

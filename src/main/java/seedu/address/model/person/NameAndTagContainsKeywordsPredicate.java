@@ -11,7 +11,7 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.tag.Tag;
 
 /**
- * Tests that a {@code Person}'s {@code Name} matches any of the name keywords
+ * Tests that a {@code Person}'s {@code Name} or aliases match any of the name keywords
  * and that the person's tags match any of the tag keywords.
  */
 public class NameAndTagContainsKeywordsPredicate implements Predicate<Person> {
@@ -49,7 +49,9 @@ public class NameAndTagContainsKeywordsPredicate implements Predicate<Person> {
 
     private boolean matchesName(Person person) {
         return nameKeywords.isEmpty() || nameKeywords.stream()
-                .anyMatch(keyword -> StringUtil.containsWordIgnoreCase(person.getName().fullName, keyword));
+                .anyMatch(keyword -> StringUtil.containsWordIgnoreCase(person.getName().fullName, keyword)
+                        || person.getAliases().stream()
+                        .anyMatch(alias -> StringUtil.containsWordIgnoreCase(alias.value, keyword)));
     }
 
     private boolean matchesTag(Person person) {

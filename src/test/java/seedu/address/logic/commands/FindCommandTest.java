@@ -19,6 +19,8 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.NameAndTagContainsKeywordsPredicate;
+import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
 
 /**
  * Contains integration tests (interaction with the Model) for {@code FindCommand}.
@@ -73,6 +75,22 @@ public class FindCommandTest {
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(Arrays.asList(CARL, ELLE, FIONA), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_aliasKeyword_personFound() {
+        Person aliasPerson = new PersonBuilder().withName("Alice Pauline").withAliases("Shadow Fox").build();
+        model = new ModelManager();
+        expectedModel = new ModelManager();
+        model.addPerson(aliasPerson);
+        expectedModel.addPerson(aliasPerson);
+
+        String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 1);
+        NameAndTagContainsKeywordsPredicate predicate = preparePredicate("Shadow");
+        FindCommand command = new FindCommand(predicate);
+        expectedModel.updateFilteredPersonList(predicate);
+        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+        assertEquals(Collections.singletonList(aliasPerson), model.getFilteredPersonList());
     }
 
     @Test

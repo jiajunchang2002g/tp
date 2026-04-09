@@ -30,23 +30,41 @@ public class ModelManager implements Model {
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
     private final SortedList<Person> sortedPersons;
+    private final boolean addressBookDataCorrupted;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
      */
     public ModelManager(ReadOnlyAddressBook addressBook, ReadOnlyUserPrefs userPrefs) {
+        this(addressBook, userPrefs, false);
+    }
+
+    /**
+     * Initializes a ModelManager with the given addressBook, userPrefs, and load corruption flag.
+     *
+     * @param addressBookDataCorrupted if true, the address book file was present but failed to load; disk must not be
+     *                                 overwritten with this in-memory state until the user fixes the file.
+     */
+    public ModelManager(ReadOnlyAddressBook addressBook, ReadOnlyUserPrefs userPrefs,
+            boolean addressBookDataCorrupted) {
         requireAllNonNull(addressBook, userPrefs);
 
         logger.fine("Initializing with CrimeWatch data: " + addressBook + " and user prefs " + userPrefs);
 
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
+        this.addressBookDataCorrupted = addressBookDataCorrupted;
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
         sortedPersons = new SortedList<>(filteredPersons);
     }
 
     public ModelManager() {
         this(new AddressBook(), new UserPrefs());
+    }
+
+    @Override
+    public boolean isAddressBookDataCorrupted() {
+        return addressBookDataCorrupted;
     }
 
     //=========== UserPrefs ==================================================================================
@@ -124,7 +142,8 @@ public class ModelManager implements Model {
     public void addReminderToContact(Index index, Reminder reminder) {
         requireAllNonNull(index, reminder);
 
-        Person target = filteredPersons.get(index.getZeroBased());
+        // Index-based commands operate on the currently displayed (sorted/filtered) list.
+        Person target = sortedPersons.get(index.getZeroBased());
         List<Reminder> updatedReminders = new ArrayList<>(target.getReminders());
         updatedReminders.add(reminder);
         Collections.sort(updatedReminders);
@@ -188,7 +207,8 @@ public class ModelManager implements Model {
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
                 && filteredPersons.equals(otherModelManager.filteredPersons)
-                && sortedPersons.equals(otherModelManager.sortedPersons);
+                && sortedPersons.equals(otherModelManager.sortedPersons)
+                && addressBookDataCorrupted == otherModelManager.addressBookDataCorrupted;
     }
 
 }

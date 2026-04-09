@@ -40,22 +40,22 @@ No programming experience is required.
 
 ### Key Features
 
-CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts; **Log** and **Edit** encounters; **View** contact details; **Set reminders**; **Search** by keywords; **Export** to CSV; **Sort** the contact list; and **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
+CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts; **Log** and **Edit** encounters; **View** contact details; **Set reminders**; **Search** contacts by name, alias, and/or tags (`find`); **Export** to CSV; **Sort** the contact list; and **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
 
 ## Command summary
 
 | Feature | Command format | Go to |
 | --- | --- | --- |
-| Add Contact | `add n/NAME a/ALIAS s/STAGE [r/RISK] [note/NOTES] [pw/PASSWORD]` | [1) Add Contact](#1-add-contact-add) |
+| Add Contact | `add n/NAME p/PHONE e/EMAIL a/ADDRESS s/STAGE [al/ALIAS(,ALIAS...)] [note/NOTES] [r/RISK] [pw/PASSWORD] [t/TAG]...` | [1) Add Contact](#1-add-contact-add) |
 | Edit Contact | `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [s/STAGE] [al/ALIAS(,ALIAS...)] [note/NOTES] [r/RISK] [pw/PASSWORD] [t/TAG]...` | [2) Edit Contact](#2-edit-contact-edit) |
 | Delete Contact | `delete INDEX` | [3) Delete Contact](#3-delete-contact-delete) |
 | Log Encounter | `log INDEX d/DATE t/TIME l/LOCATION desc/DESCRIPTION [out/OUTCOME]` | [4) Log Encounter](#4-log-encounter-log) |
 | Edit Encounter | `editencounter PERSON_INDEX ENCOUNTER_INDEX [d/DATE] [t/TIME] [l/LOCATION] [desc/DESCRIPTION] [out/OUTCOME]` | [5) Edit Encounter](#5-edit-encounter-editencounter) |
-| View Contact | `view INDEX [pw/PASSWORD]` | [6) View Contact](#6-view-contact-view) |
-| Set Reminder | `remind INDEX d/DATE t/TIME note/NOTE` | [7) Set Reminder](#7-set-reminder-remind) |
-| Search Contacts | `find KEYWORD [MORE_KEYWORDS]` | [8) Search Contacts](#8-search-contacts-find) |
-| Export encounters (CSV) | `export l/LOCATION` | [9) Export encounters](#9-export-encounters-to-csv-export) |
-| Sort Contacts | `sort CRITERION` | [10) Sort Contacts](#10-sort-contacts-sort) |
+| View Contact | `view INDEX [pw/PASSWORD]` | [7) View Contact](#7-view-contact-view) |
+| Set Reminder | `remind INDEX d/DATE t/TIME note/NOTE` | [6) Set Reminder](#6-set-reminder-remind) |
+| Search Contacts | `find [NAME_KEYWORD]... [t/TAG]...` | [8) Search Contacts](#8-search-contacts-find) |
+| Export encounters (CSV) | `export l/LOCATION` | [10) Export encounters](#10-export-encounters-to-csv-export) |
+| Sort Contacts | `sort CRITERION` | [9) Sort Contacts](#9-sort-contacts-sort) |
 | Clear All Data | `clear` | [11) Clear All Data](#11-clear-all-data-clear) |
 | Exit Application | `exit` | [12) Exit Application](#12-exit-application-exit) |
 
@@ -69,7 +69,7 @@ CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts
 1. Ensure Java `17` or above is installed.
   **Mac users:** verify the exact JDK setup [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-2. Download the latest CrimeWatch `.jar` file from [Releases](https://github.com/se-edu/addressbook-level3/releases).
+2. Download the latest CrimeWatch `.jar` file from [Releases](https://github.com/AY2526S2-CS2103T-T16-4/tp/releases).
 
 3. Move the `.jar` file into a folder you want to use as your CrimeWatch home folder.
   A new empty folder is recommended.
@@ -86,17 +86,17 @@ CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts
 
    ![Opening the .jar file](images/ug-terminal-command.png)
 
-5. Confirm the app opens and sample data is visible.
+6. Confirm the app opens and sample data is visible.
    ![Ui](images/Ui.png)
 
-6. Try this 60-second typed-command tutorial:
+7. Try this 60-second typed-command tutorial:
    - `help` to open this user guide.
    - `list` to show all contacts.
-   - `add n/John Doe a/JD s/surveillance r/high note/Observed near station` to add a suspect profile.
+   - `add n/John Doe p/98765432 e/john@example.com a/Maxwell Road s/surveillance al/JD r/high note/Observed near station` to add a suspect profile.
    - `view 1` to inspect the first contact.
    - `log 1 d/2026-03-31 t/21:15 l/Maxwell Road desc/Short conversation out/Agreed to follow up` to log an encounter.
 
-7. Expected result after Step 6:
+8. Expected result after Step 7:
    - You should see one newly added contact.
    - You should see one newly added encounter for that contact.
 
@@ -104,7 +104,7 @@ CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts
 Do not store classified or highly sensitive intelligence in `note/` or `desc/` fields. Data is saved locally and contact passwords are plain text.
 </div>
 
-8. Continue with [Features](#features) for full command details.
+9. Continue with [Features](#features) for full command details.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -142,36 +142,38 @@ For fastest field operations, use this command rhythm: `find` -> `view` -> `log`
 
 Shows a message explaining how to access the help page.
 
-![help message](images/helpMessage.png)
-
 Format: `help`
 
 ### 1) Add Contact: `add`
 
-Creates a new suspect profile with aliases, investigation stage, and risk level.
+Creates a new suspect profile.
 
 **Format**
-`add n/NAME al/ALIAS s/STAGE [r/RISK] [note/NOTES] [pw/PASSWORD]`
+`add n/NAME p/PHONE e/EMAIL a/ADDRESS s/STAGE [al/ALIAS(,ALIAS...)] [note/NOTES] [r/RISK] [pw/PASSWORD] [t/TAG]...`
 
 **Parameters**
 - `n/NAME` (required): suspect's full name (alphanumeric + spaces, not blank)
-- `al/ALIAS` (required): one or more aliases, **comma-separated** (e.g. `a/Ah Boy, Johnny T`)
-- `s/STAGE` (required): investigation stage
-- `r/RISK` (optional): risk level—one of `low`, `medium`, `high` (default: `medium`)
-- `note/NOTES` (optional): initial notes (up to 500 characters, no newlines)
-- `pw/PASSWORD` (optional): per-contact password used to restrict viewing full contact details
+- `p/PHONE` (required): phone number (digits only, at least 3 digits)
+- `e/EMAIL` (required): valid email address
+- `a/ADDRESS` (required): address (not blank)
+- `s/STAGE` (required): one of `surveillance`, `approached`, `cooperating`, `arrested`, `closed`
+- `al/ALIAS(,ALIAS...)` (optional): alias list, comma-separated
+- `note/NOTES` (optional): notes up to 500 characters, no newlines
+- `r/RISK` (optional): one of `low`, `medium`, `high` (default: `medium`)
+- `pw/PASSWORD` (optional): contact-level password for `view`
+- `t/TAG` (optional, repeatable): tags
 
 **Examples**
-- `add n/John Tan a/Ah Boy s/surveillance`
-- `add n/Michael Lee a/Big Mike s/approached r/high note/Seen at Marina Bay`
-- `add n/John Doe a/JD s/surveillance pw/password123`
+- `add n/John Tan p/98765432 e/johntan@example.com a/311, Clementi Ave 2, #02-25 s/surveillance`
+- `add n/Michael Lee p/91234567 e/mlee@example.com a/Marina Bay s/approached al/Big Mike, MLee note/Seen at Marina Bay r/high t/priority`
+- `add n/John Doe p/87654321 e/john@example.com a/Maxwell Road s/surveillance pw/password123`
 
 **Validation**
-- Names must be unique
 - All required fields must be present
+- Repeating single-value prefixes in the same command is not allowed
 
 **Success output**
-`New contact added: [Name] (Stage: X, Risk: Y)`
+`New person added: [person details]`
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -186,6 +188,7 @@ Updates details of an existing contact without deleting and re-adding the profil
 - `INDEX` (compulsory): target contact in current list
 - At least one prefixed field must be provided
 - Any omitted field remains unchanged
+- `p/PHONE` (optional): Singapore phone number, exactly 8 digits and must start with `6`, `8`, or `9`
 
 **Examples**
 - `edit 1 p/91234567 e/johndoe@example.com`
@@ -197,6 +200,7 @@ Updates details of an existing contact without deleting and re-adding the profil
 - INDEX must exist in the current list.
 - Provided fields follow the same validation rules as `add`.
 - Repeating non-tag prefixes in the same command is not allowed.
+- For `p/PHONE`, only valid Singapore numbers are accepted: exactly 8 digits, starting with `6`, `8`, or `9`.
 
 **Success output**
 `Edited Person: [person details]`
@@ -205,7 +209,7 @@ Updates details of an existing contact without deleting and re-adding the profil
 
 ### 3) Delete Contact: `delete`
 
-Removes a contact **and all associated encounters** permanently.
+Removes a contact permanently, including all associated encounters and reminders.
 
 **Format**
 `delete INDEX`
@@ -215,10 +219,10 @@ Removes a contact **and all associated encounters** permanently.
 
 **Validation**
 - INDEX must exist in the current list.
-- Error: `Invalid index.`
+- Error: `The person index provided is invalid`
 
 **Success output**
-`Deleted contact: [Name]. All associated encounters are removed.`
+`Deleted Person: [person details]`
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -313,7 +317,7 @@ Adds a reminder entry to a contact.
 
 ### 7) View Contact: `view`
 
-Displays the full profile of a contact and their chronological encounter history.
+Displays the full profile of a contact and their encounter cards.
 
 **Format**
 `view INDEX [pw/PASSWORD]`
@@ -335,27 +339,29 @@ Displays the full profile of a contact and their chronological encounter history
 - Stage
 - Risk
 - Notes
-- Encounter History (sorted by date-time ascending)
+- Encounter History (`#1` is the most recently logged encounter)
 
 --------------------------------------------------------------------------------------------------------------------
 
 ### 8) Search Contacts: `find`
 
-Retrieves contacts by keyword across multiple fields.
+Filters the contact list by **name or alias keywords** (optional) and/or **tags** (optional). You must supply at least one name keyword or one tag.
 
 **Format**
-`find KEYWORD [MORE_KEYWORDS]`
+`find [NAME_KEYWORD]... [t/TAG]...`
 
 **Examples**
 - `find john`
-- `find mike marina`
+- `find mike marina` — matches if **any** name or alias keyword matches (see below).
+- `find t/suspect t/wanted` — matches contacts that have **any** of these tags.
+- `find alice t/suspect` — matches only if the contact satisfies **both**: name criteria **and** tag criteria (not either alone).
 
 **Behavior**
-- Case-insensitive
-- Partial match allowed
-- Matched fields: **Name**, **Alias**, **Notes**
-- If no matches:
-  `No contacts found matching the given keywords.`
+- **Name keywords** (text before any `t/`): case-insensitive; each keyword must match a **whole word** in the contact’s **name or aliases**. If you give several name keywords, a contact matches if **any** of those words appears in the name or aliases.
+- **Tags**: use `t/TAG` (alphanumeric tag names only). You can repeat `t/` for multiple tags; a contact matches if it has **any** of the listed tags.
+- **Name + tags in the same command**: the contact must match the **name** part **and** the **tag** part together (**AND**), not one or the other.
+- Notes are **not** searched by `find`.
+- Result count is shown as `X persons listed!` (including `0 persons listed!` when nothing matches).
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -382,11 +388,11 @@ Sorts the currently displayed contact list by a chosen criterion.
 
 **Behavior**
 - Sorting is applied to the displayed list view.
-- `sort location`: uses each contact's most recently logged encounter location; contacts without encounters appear last.
+- `sort location`: uses each contact's latest logged encounter location (the last encounter in that contact's history); contacts without encounters appear last.
 - `sort tag`: uses each contact's alphabetically smallest tag; contacts without tags appear last.
 - `sort alphabetical`: sorts by contact name (A-Z).
 - `sort status`: sorts by stage/status alphabetically.
-- `sort recent`: sorts by most recently encountered first.
+- `sort recent`: sorts by latest logged encounter time first (the last encounter in each contact's history).
 - Ties are resolved by contact name in alphabetical order.
 
 --------------------------------------------------------------------------------------------------------------------
@@ -466,14 +472,17 @@ _Details coming soon ..._
 **Q: What if I need to modify an encounter record I logged earlier?**<br>
 **A**: Use the `editencounter` command with the person index and encounter index. Type `view INDEX` first to see all encounters for that suspect, then identify which encounter to edit.
 
-**Q: How do I search for a suspect if I only remember part of their name or alias?**<br>
-**A**: Use the `find` command with a keyword. The search is case-insensitive and matches across names, aliases, and notes. For example: `find mike marina`.
+**Q: How do I search for a suspect if I only remember part of their name, alias, or a tag?**<br>
+**A**: Use `find` with name keywords and/or `t/TAG`. Name matching is case-insensitive by **whole word** in the contact’s **name or aliases** (notes are not searched). Example: `find mike` or `find t/highrisk`. To require both a name and a tag, combine them, e.g. `find alex t/suspect` (**and**, not or).
 
 **Q: Can I track the same suspect across multiple investigation stages?**<br>
 **A**: Yes. Use the `edit` command to update the `s/STAGE` field as the investigation progresses (e.g., from `surveillance` to `arrested` to `closed`).
 
 **Q: My command is giving an error even though it looks correct. What should I check?**<br>
 **A**: 1) Ensure you're not repeating prefixes (e.g., `n/... n/...` is invalid). 2) Check date/time formats are exactly `YYYY-MM-DD` and `HH:mm`. 3) Verify the index exists in the current contact list. 4) If copying from a PDF, manually retype the command to avoid hidden space issues.
+
+**Q: What if `addressbook.json` is corrupted or cannot be read?**<br>
+**A**: CrimeWatch shows an error when the app opens. Only the `exit` command is accepted until you repair or replace the file; other commands are blocked and your data file is not overwritten. Use `exit`, fix `addressbook.json` (e.g. from a backup), then restart.
 
 --------------------------------------------------------------------------------------------------------------------
 

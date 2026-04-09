@@ -21,6 +21,7 @@ import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Encounter;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Reminder;
 import seedu.address.testutil.PersonBuilder;
 
 /**
@@ -45,6 +46,10 @@ public class LogCommandTest {
             "Orchard Road",
             "Brief sighting near mall entrance",
             Optional.empty());
+    private static final Reminder REMINDER = new Reminder(
+            java.time.LocalDate.of(2026, 3, 28),
+            java.time.LocalTime.of(20, 0),
+            "Meet informant");
 
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
@@ -67,7 +72,8 @@ public class LogCommandTest {
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.setPerson(personToLog, updatedPerson);
 
-        assertCommandSuccess(logCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedResult = new CommandResult(expectedMessage, updatedPerson);
+        assertCommandSuccess(logCommand, model, expectedResult, expectedModel);
     }
 
     @Test
@@ -87,7 +93,8 @@ public class LogCommandTest {
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.setPerson(personToLog, updatedPerson);
 
-        assertCommandSuccess(logCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedResult = new CommandResult(expectedMessage, updatedPerson);
+        assertCommandSuccess(logCommand, model, expectedResult, expectedModel);
     }
 
     @Test
@@ -113,7 +120,50 @@ public class LogCommandTest {
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.setPerson(personWithOne, updatedPerson);
 
-        assertCommandSuccess(logCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedResult = new CommandResult(expectedMessage, updatedPerson);
+        assertCommandSuccess(logCommand, model, expectedResult, expectedModel);
+    }
+
+    @Test
+    public void execute_validIndexUnfilteredList_preservesReminders() {
+        Person original = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person personWithReminder = new Person(
+                original.getName(),
+                original.getPhone(),
+                original.getEmail(),
+                original.getAddress(),
+                original.getStage(),
+                original.getAliases(),
+                original.getNotes(),
+                original.getRisk(),
+                original.getTags(),
+                original.getEncounters(),
+                java.util.List.of(REMINDER));
+        model.setPerson(original, personWithReminder);
+
+        LogCommand logCommand = new LogCommand(INDEX_FIRST_PERSON, ENCOUNTER_WITH_OUTCOME);
+        String expectedMessage = String.format(
+                LogCommand.MESSAGE_SUCCESS,
+                personWithReminder.getName(),
+                ENCOUNTER_WITH_OUTCOME.getFormattedDateTime());
+
+        Person updatedPerson = new Person(
+                personWithReminder.getName(),
+                personWithReminder.getPhone(),
+                personWithReminder.getEmail(),
+                personWithReminder.getAddress(),
+                personWithReminder.getStage(),
+                personWithReminder.getAliases(),
+                personWithReminder.getNotes(),
+                personWithReminder.getRisk(),
+                personWithReminder.getTags(),
+                java.util.List.of(ENCOUNTER_WITH_OUTCOME),
+                java.util.List.of(REMINDER));
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.setPerson(personWithReminder, updatedPerson);
+
+        CommandResult expectedResult = new CommandResult(expectedMessage, updatedPerson);
+        assertCommandSuccess(logCommand, model, expectedResult, expectedModel);
     }
 
     @Test
@@ -136,7 +186,46 @@ public class LogCommandTest {
         CommandTestUtil.showPersonAtIndex(expectedModel, INDEX_FIRST_PERSON);
         expectedModel.setPerson(personToLog, updatedPerson);
 
-        assertCommandSuccess(logCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedResult = new CommandResult(expectedMessage, updatedPerson);
+        assertCommandSuccess(logCommand, model, expectedResult, expectedModel);
+    }
+
+    @Test
+    public void execute_protectedContact_passwordPreserved() {
+        Person original = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person protectedPerson = new PersonBuilder(original)
+                .withPassword("hunter2")
+                .build();
+        model.setPerson(original, protectedPerson);
+
+        LogCommand logCommand = new LogCommand(INDEX_FIRST_PERSON, ENCOUNTER_NO_OUTCOME);
+        String expectedMessage = String.format(
+                LogCommand.MESSAGE_SUCCESS,
+                protectedPerson.getName(),
+                ENCOUNTER_NO_OUTCOME.getFormattedDateTime());
+
+        Person updatedPerson = new PersonBuilder(protectedPerson)
+                .withEncounters(ENCOUNTER_NO_OUTCOME)
+                .build();
+        assertTrue(updatedPerson.hasPassword());
+        assertTrue(updatedPerson.isPasswordMatch("hunter2"));
+
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.setPerson(protectedPerson, updatedPerson);
+
+        CommandResult expectedResult = new CommandResult(expectedMessage, updatedPerson);
+        assertCommandSuccess(logCommand, model, expectedResult, expectedModel);
+    }
+
+    @Test
+    public void execute_success_returnsLoggedPersonToView() throws Exception {
+        LogCommand logCommand = new LogCommand(INDEX_FIRST_PERSON, ENCOUNTER_NO_OUTCOME);
+
+        CommandResult result = logCommand.execute(model);
+
+        assertTrue(result.getPersonToView().isPresent());
+        assertEquals(model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased()),
+                result.getPersonToView().get());
     }
 
     // ── execute: failures ────────────────────────────────────────────────────

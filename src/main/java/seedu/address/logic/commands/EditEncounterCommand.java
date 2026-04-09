@@ -92,20 +92,50 @@ public class EditEncounterCommand extends Command {
         List<Encounter> updatedEncounters = new ArrayList<>(existingEncounters);
         updatedEncounters.set(encounterZeroBased, editedEncounter);
 
-        Person editedPerson = new Person(
-                personToEdit.getName(),
-                personToEdit.getPhone(),
-                personToEdit.getEmail(),
-                personToEdit.getAddress(),
-                personToEdit.getStage(),
-                personToEdit.getAliases(),
-                personToEdit.getNotes(),
-                personToEdit.getRisk(),
-                personToEdit.getTags(),
-                updatedEncounters);
+        Person editedPerson = createEditedPerson(personToEdit, updatedEncounters);
 
         model.setPerson(personToEdit, editedPerson);
-        return new CommandResult(String.format(MESSAGE_SUCCESS, encounterDisplayOneBased, personToEdit.getName()));
+        return createSuccessResult(encounterDisplayOneBased, editedPerson);
+    }
+
+    /**
+     * Rebuilds the contact with updated encounter history after an encounter edit.
+     */
+    private Person createEditedPerson(Person personToEdit, List<Encounter> updatedEncounters) {
+        var name = personToEdit.getName();
+        var phone = personToEdit.getPhone();
+        var email = personToEdit.getEmail();
+        var address = personToEdit.getAddress();
+        var stage = personToEdit.getStage();
+        var aliases = personToEdit.getAliases();
+        var notes = personToEdit.getNotes();
+        var risk = personToEdit.getRisk();
+        var tags = personToEdit.getTags();
+        var reminders = personToEdit.getReminders();
+        var password = personToEdit.getPassword();
+
+        return new Person(
+                name,
+                phone,
+                email,
+                address,
+                stage,
+                aliases,
+                notes,
+                risk,
+                tags,
+                updatedEncounters,
+                reminders,
+                password);
+    }
+
+    /**
+     * Creates the success result for a completed encounter edit.
+     */
+    private CommandResult createSuccessResult(int encounterDisplayOneBased, Person editedPerson) {
+        return new CommandResult(
+                String.format(MESSAGE_SUCCESS, encounterDisplayOneBased, editedPerson.getName()),
+                editedPerson);
     }
 
     private static Encounter createEditedEncounter(Encounter encounterToEdit, EditEncounterDescriptor descriptor) {
