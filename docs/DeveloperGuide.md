@@ -302,17 +302,22 @@ add n/John Doe p/98765432 e/john@example.com a/123 Main St s/suspect pw/password
 # Update/remove password
 edit 1 pw/newpassword   # Change password
 edit 1 pw/              # Remove protection
+```
 
-# View protected contact
+### View protected contact
 view 1 pw/password123   # Show full details if password correct
 view 1                  # Error: password required
-```
 
 ### Behavior
 - **Without password**: Contact viewable normally
 - **With password**: `view` command requires correct password to display full details
 - **Plain text**: Passwords stored without encryption (not production-ready)
 
+### Sequence Diagram
+
+The following sequence diagram shows how the `view` command processes a password-protected contact:
+
+![View Protected Contact Sequence Diagram](images/ViewProtectedContactSequenceDiagram.png)
 
 ### \[Proposed\] Undo/redo feature
 

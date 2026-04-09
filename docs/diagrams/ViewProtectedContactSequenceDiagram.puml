@@ -1,0 +1,78 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+actor User USER_COLOR
+
+box UI UI_COLOR_T1
+participant ":MainWindow" as MainWindow UI_COLOR
+end box
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":ViewCommandParser" as ViewCommandParser LOGIC_COLOR
+participant "vc:ViewCommand" as ViewCommand LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant ":Model" as Model MODEL_COLOR
+end box
+
+User -> MainWindow : enter "view 1 pw/secret"
+activate MainWindow
+
+MainWindow -> LogicManager : execute(commandText)
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand(commandText)
+activate AddressBookParser
+
+create ViewCommandParser
+AddressBookParser -> ViewCommandParser
+activate ViewCommandParser
+ViewCommandParser --> AddressBookParser
+deactivate ViewCommandParser
+
+AddressBookParser -> ViewCommandParser : parse(args)
+activate ViewCommandParser
+
+create ViewCommand
+ViewCommandParser -> ViewCommand
+activate ViewCommand
+ViewCommand --> ViewCommandParser
+deactivate ViewCommand
+
+ViewCommandParser --> AddressBookParser : vc
+deactivate ViewCommandParser
+ViewCommandParser -[hidden]-> AddressBookParser
+destroy ViewCommandParser
+
+AddressBookParser --> LogicManager : vc
+deactivate AddressBookParser
+
+LogicManager -> ViewCommand : execute(model)
+activate ViewCommand
+
+ViewCommand -> Model : getFilteredPersonList()
+activate Model
+Model --> ViewCommand : filteredList
+deactivate Model
+
+alt password missing or wrong
+    ViewCommand --> LogicManager : CommandException
+    deactivate ViewCommand
+    LogicManager --> MainWindow : CommandException
+    deactivate LogicManager
+    MainWindow --> User
+    deactivate MainWindow
+else password correct
+    ViewCommand --> LogicManager : result
+    deactivate ViewCommand
+    LogicManager --> MainWindow : result
+    deactivate LogicManager
+    MainWindow -> MainWindow : showViewPanel(personToView)
+    MainWindow --> User
+    deactivate MainWindow
+end
+@enduml
