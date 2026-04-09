@@ -75,6 +75,9 @@ public class EditCommandParser implements Parser<EditCommand> {
         }
         if (argMultimap.getValue(PREFIX_ALIAS).isPresent()) {
             List<Alias> aliases = ParserUtil.parseAliases(argMultimap.getValue(PREFIX_ALIAS).get());
+            if (aliases.isEmpty()) {
+                throw new ParseException(Alias.MESSAGE_CONSTRAINTS);
+            }
             editPersonDescriptor.setAliases(aliases);
         }
         if (argMultimap.getValue(PREFIX_NOTES).isPresent()) {
