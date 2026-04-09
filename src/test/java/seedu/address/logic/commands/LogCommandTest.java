@@ -139,6 +139,30 @@ public class LogCommandTest {
         assertCommandSuccess(logCommand, model, expectedMessage, expectedModel);
     }
 
+    @Test
+    public void execute_validIndexUnfilteredList_passwordProtectedContact_passwordPreserved() {
+        Person original = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person protectedPerson = new PersonBuilder(original)
+                .withPassword("hunter2")
+                .build();
+        model.setPerson(original, protectedPerson);
+
+        LogCommand logCommand = new LogCommand(INDEX_FIRST_PERSON, ENCOUNTER_NO_OUTCOME);
+        String expectedMessage = String.format(
+                LogCommand.MESSAGE_SUCCESS,
+                protectedPerson.getName(),
+                ENCOUNTER_NO_OUTCOME.getFormattedDateTime());
+
+        Person updatedPerson = new PersonBuilder(protectedPerson)
+                .withEncounters(ENCOUNTER_NO_OUTCOME)
+                .build();
+
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.setPerson(protectedPerson, updatedPerson);
+
+        assertCommandSuccess(logCommand, model, expectedMessage, expectedModel);
+    }
+
     // ── execute: failures ────────────────────────────────────────────────────
 
     @Test
