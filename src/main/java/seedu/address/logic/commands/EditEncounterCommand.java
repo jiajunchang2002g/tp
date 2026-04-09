@@ -102,7 +102,8 @@ public class EditEncounterCommand extends Command {
                 personToEdit.getNotes(),
                 personToEdit.getRisk(),
                 personToEdit.getTags(),
-                updatedEncounters);
+                updatedEncounters,
+                personToEdit.getReminders());
 
         model.setPerson(personToEdit, editedPerson);
         return new CommandResult(String.format(MESSAGE_SUCCESS, encounterDisplayOneBased, personToEdit.getName()));
