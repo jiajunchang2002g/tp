@@ -26,6 +26,7 @@ public class ListCommand extends Command {
      * Restores the list view to show all persons.
      */
     private void showAllPersons(Model model) {
+        model.clearPersonSortComparator();
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 }
