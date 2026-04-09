@@ -86,16 +86,26 @@ public class LogCommand extends Command {
      * Rebuilds the logged contact with updated encounter history.
      */
     private Person createLoggedPerson(Person personToLog, List<Encounter> updatedEncounters) {
+        var name = personToLog.getName();
+        var phone = personToLog.getPhone();
+        var email = personToLog.getEmail();
+        var address = personToLog.getAddress();
+        var stage = personToLog.getStage();
+        var aliases = personToLog.getAliases();
+        var notes = personToLog.getNotes();
+        var risk = personToLog.getRisk();
+        var tags = personToLog.getTags();
+
         return new Person(
-                personToLog.getName(),
-                personToLog.getPhone(),
-                personToLog.getEmail(),
-                personToLog.getAddress(),
-                personToLog.getStage(),
-                personToLog.getAliases(),
-                personToLog.getNotes(),
-                personToLog.getRisk(),
-                personToLog.getTags(),
+                name,
+                phone,
+                email,
+                address,
+                stage,
+                aliases,
+                notes,
+                risk,
+                tags,
                 updatedEncounters);
     }
 
