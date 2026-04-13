@@ -237,7 +237,7 @@ Validation is enforced in model/value objects and parser utilities:
 - `Stage`: one of `surveillance`, `approached`, `cooperating`, `arrested`, `closed`.
 - `Notes`: optional text, max 500 chars, no newlines.
 - `Risk`: one of `low`, `medium`, `high` (case-insensitive parser).
-- `Password`: alphanumeric + spaces, non-blank when provided.
+- `Password`: alphanumeric, no spaces, non-blank when provided.
 - `Tag`: alphanumeric.
 
 Relevant classes:
