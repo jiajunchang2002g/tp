@@ -171,6 +171,7 @@ Creates a new suspect profile.
 **Validation**
 - All required fields must be present
 - Repeating single-value prefixes in the same command is not allowed
+- Duplicate contacts are not allowed. A contact is considered a duplicate if it has the same name as an existing contact (name matching is **case-insensitive**, e.g. `john tan` and `John Tan` are treated as the same contact)
 
 **Success output**
 `New person added: [person details]`
