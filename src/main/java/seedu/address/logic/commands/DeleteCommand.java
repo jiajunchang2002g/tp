@@ -86,7 +86,7 @@ public class DeleteCommand extends Command {
 
         DeleteCommand otherDeleteCommand = (DeleteCommand) other;
     return targetIndex.equals(otherDeleteCommand.targetIndex)
-        && Objects.equals(providedPassword, otherDeleteCommand.providedPassword);
+            && Objects.equals(providedPassword, otherDeleteCommand.providedPassword);
     }
 
     @Override
