@@ -153,7 +153,7 @@ Creates a new suspect profile.
 
 **Parameters**
 - `n/NAME` (required): suspect's full name (alphanumeric + spaces, not blank)
-- `p/PHONE` (required): phone number (digits only, at least 3 digits)
+- `p/PHONE` (required): phone number (Singapore format, 8 digits, starts with 6/8/9)
 - `e/EMAIL` (required): valid email address
 - `a/ADDRESS` (required): address (not blank)
 - `s/STAGE` (required): one of `surveillance`, `approached`, `cooperating`, `arrested`, `closed`
