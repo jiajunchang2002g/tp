@@ -28,22 +28,22 @@ public class DeleteCommand extends Command {
             + "Example (protected): " + COMMAND_WORD + " 1 " + PREFIX_PASSWORD + "hunter2";
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted Person: %1$s";
-        public static final String MESSAGE_PASSWORD_REQUIRED_FOR_DELETE =
+    public static final String MESSAGE_PASSWORD_REQUIRED_FOR_DELETE =
             "This contact is password-protected. Include " + PREFIX_PASSWORD + "CURRENT_PASSWORD in your delete.";
-        public static final String MESSAGE_UNEXPECTED_PASSWORD_FOR_DELETE =
+    public static final String MESSAGE_UNEXPECTED_PASSWORD_FOR_DELETE =
             "This contact is not password-protected. Remove " + PREFIX_PASSWORD + ".";
 
     private final Index targetIndex;
-        private final String providedPassword;
+    private final String providedPassword;
 
     public DeleteCommand(Index targetIndex) {
         this(targetIndex, null);
-        }
+    }
 
-        /**
-         * Creates a delete command for an index with an optional password.
-         */
-        public DeleteCommand(Index targetIndex, String providedPassword) {
+    /**
+     * Creates a delete command for an index with an optional password.
+     */
+    public DeleteCommand(Index targetIndex, String providedPassword) {
         this.targetIndex = targetIndex;
         this.providedPassword = providedPassword;
     }
@@ -85,7 +85,7 @@ public class DeleteCommand extends Command {
         }
 
         DeleteCommand otherDeleteCommand = (DeleteCommand) other;
-    return targetIndex.equals(otherDeleteCommand.targetIndex)
+        return targetIndex.equals(otherDeleteCommand.targetIndex)
             && Objects.equals(providedPassword, otherDeleteCommand.providedPassword);
     }
 
