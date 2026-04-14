@@ -501,10 +501,6 @@ If your changes to the data file make its format invalid, CrimeWatch will discar
 Furthermore, certain edits can cause CrimeWatch to behave in unexpected ways (e.g., if a value entered is outside acceptable ranges). Edit the data file only if you are confident that you can update it correctly.
 </div>
 
-### Archiving data files `[coming in v1.6]`
-
-_Details coming soon ..._
-
 --------------------------------------------------------------------------------------------------------------------
 
 <div style="page-break-after: always;"></div>
