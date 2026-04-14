@@ -160,7 +160,7 @@ Creates a new suspect profile.
 - `al/ALIAS(,ALIAS...)` (optional): alias list, comma-separated
 - `note/NOTES` (optional): notes up to 500 characters, no newlines
 - `r/RISK` (optional): one of `low`, `medium`, `high` (default: `medium`)
-- `pw/PASSWORD` (optional): contact-level password for `view`
+- `pw/PASSWORD` (optional): sets a contact-level password. Once set, the correct password must be supplied via `pw/CURRENT_PASSWORD` to use `view`, `edit`, `log`, and `remind` on that contact
 - `t/TAG` (optional, repeatable): tags
 
 **Examples**
@@ -204,6 +204,7 @@ Updates details of an existing contact without deleting and re-adding the profil
 - Provided fields follow the same validation rules as `add`.
 - Repeating non-tag prefixes in the same command is not allowed.
 - For `p/PHONE`, only valid Singapore numbers are accepted: exactly 8 digits, starting with `6`, `8`, or `9`.
+- If the contact is password-protected, `pw/CURRENT_PASSWORD` is required. Omitting it or supplying the wrong password will result in an error.
 
 **Success output**
 `Edited Person: [person details]`
@@ -259,6 +260,7 @@ Records an interaction with a contact and appends it to the contact’s encounte
   Error: `Invalid time. Use 24-hour format HH:mm.`
 - DESCRIPTION cannot be blank; 1–500 characters
 - Repeating `d/`, `t/`, `l/`, `desc/`, `out/`, or `pw/` in the same command is not allowed.
+- If the contact is password-protected, `pw/CURRENT_PASSWORD` is required or the command will be rejected.
 - If the contact is not password-protected, do not supply `pw/`.
 
 **Success output**
@@ -324,6 +326,7 @@ Adds a reminder entry to a contact.
 - TIME must be valid and use 24-hour `HH:mm`.
 - NOTE cannot be blank.
 - Repeating `d/`, `t/`, `note/`, or `pw/` in the same command is not allowed.
+- If the contact is password-protected, `pw/CURRENT_PASSWORD` is required or the command will be rejected.
 - If the contact is not password-protected, do not supply `pw/`.
 
 **Success output**
