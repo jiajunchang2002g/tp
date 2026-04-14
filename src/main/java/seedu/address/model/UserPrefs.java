@@ -14,12 +14,11 @@ import seedu.address.commons.core.GuiSettings;
 public class UserPrefs implements ReadOnlyUserPrefs {
 
     private GuiSettings guiSettings = new GuiSettings();
-    private Path addressBookFilePath = Paths.get("data", "crimewatch.json");
+    private Path addressBookFilePath = Paths.get("data" , "crimewatch.json");
+    private String sortCriterion = "";
 
-    /**
-     * Creates a {@code UserPrefs} with default values.
-     */
-    public UserPrefs() {}
+    public UserPrefs() {
+    }
 
     /**
      * Creates a {@code UserPrefs} with the prefs in {@code userPrefs}.
@@ -29,6 +28,14 @@ public class UserPrefs implements ReadOnlyUserPrefs {
         resetData(userPrefs);
     }
 
+    public String getSortCriterion() {
+        return sortCriterion;
+    }
+
+    public void setSortCriterion(String criterion) {
+        this.sortCriterion = criterion;
+    }
+
     /**
      * Resets the existing data of this {@code UserPrefs} with {@code newUserPrefs}.
      */
@@ -36,6 +43,7 @@ public class UserPrefs implements ReadOnlyUserPrefs {
         requireNonNull(newUserPrefs);
         setGuiSettings(newUserPrefs.getGuiSettings());
         setAddressBookFilePath(newUserPrefs.getAddressBookFilePath());
+        setSortCriterion(newUserPrefs.getSortCriterion());
     }
 
     public GuiSettings getGuiSettings() {

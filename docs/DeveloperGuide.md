@@ -237,7 +237,7 @@ Validation is enforced in model/value objects and parser utilities:
 - `Stage`: one of `surveillance`, `approached`, `cooperating`, `arrested`, `closed`.
 - `Notes`: optional text, max 500 chars, no newlines.
 - `Risk`: one of `low`, `medium`, `high` (case-insensitive parser).
-- `Password`: alphanumeric + spaces, non-blank when provided.
+- `Password`: alphanumeric, no spaces, non-blank when provided.
 - `Tag`: alphanumeric.
 
 Relevant classes:
@@ -333,6 +333,8 @@ Compatibility updates:
 
 The `log` command appends a new encounter to the selected contact in the current displayed list. After validating the target index against `Model#getFilteredPersonList()`, `LogCommand#execute(Model)` copies the contact's existing encounters, appends the new `Encounter`, rebuilds the `Person`, and calls `model.setPerson(...)`.
 
+Encounter display indexes remain chronological and dynamic: encounter cards are numbered by encounter date/time descending (most recent first), independent of append position in the stored list.
+
 The reconstructed `Person` preserves all unrelated fields, including reminders and password, while updating only the encounter history. The returned `CommandResult` includes the updated person so the UI can continue showing the refreshed profile.
 
 Key classes:
@@ -369,7 +371,7 @@ Optional, contact-level password protection. Each contact can be protected with 
 |---------|-------------|
 | **Scope** | Per-contact (individual contacts can be protected) |
 | **Type** | Optional (contacts don't require passwords) |
-| **Usage** | Add `pw/PASSWORD` to `add` or `edit` commands to protect; provide it with `view` to access |
+| **Usage** | Add `pw/PASSWORD` to `add` or `edit` commands to protect; provide current password for `view`, `delete`, `log`, and `remind` on protected contacts |
 | **Validation** | Alphanumeric characters and spaces only |
 
 ### Usage
@@ -388,9 +390,13 @@ edit 1 pw/              # Remove protection
 view 1 pw/password123   # Show full details if password correct
 view 1                  # Error: password required
 
+### Delete protected contact
+delete 1 pw/password123 # Delete succeeds if password is correct
+delete 1                # Error: password required (if protected)
+
 ### Behavior
 - **Without password**: Contact viewable normally
-- **With password**: `view` command requires correct password to display full details
+- **With password**: `view`, `delete`, `log`, and `remind` require the correct current password
 - **Plain text**: Passwords stored without encryption (not production-ready)
 
 ### Sequence Diagram
@@ -414,9 +420,9 @@ Key classes:
 
 ### Edit Encounter command
 
-The `editencounter` command uses two indices: `PERSON_INDEX` identifies the contact in the displayed contact list, while `ENCOUNTER_INDEX` refers to the encounter cards shown in `view`. The UI renders those encounter cards in reverse-chronological order, so display index `1` refers to the most recent encounter rather than the first element stored in the underlying encounter list.
+The `editencounter` command uses two indices: `PERSON_INDEX` identifies the contact in the displayed contact list, while `ENCOUNTER_INDEX` refers to the encounter cards shown in `view`. Encounter cards are displayed in descending encounter date/time order (most recent first), so display index `1` always refers to the currently most recent encounter.
 
-To preserve that user-facing numbering, `EditEncounterCommand#execute(Model)` converts the displayed encounter index back into the stored zero-based index using `existingEncounters.size() - encounterDisplayOneBased`. It then replaces only the selected encounter in a copied list and rebuilds the `Person` with the updated encounters while preserving other fields such as reminders and password protection.
+To preserve that user-facing numbering, `EditEncounterCommand#execute(Model)` dynamically maps the displayed encounter index to the underlying list position by sorting encounter indices using encounter date/time descending and selecting the requested display slot. It then replaces only the selected encounter in a copied list and rebuilds the `Person` with the updated encounters while preserving other fields such as reminders and password protection.
 
 ![Edit Encounter Sequence Diagram](images/EditEncounterSequenceDiagram.png)
 
@@ -603,6 +609,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case resumes at step 2.
 
+* 3b. The target contact is password-protected and password is missing or incorrect.
+
+   * 3b1. CrimeWatch shows an error message.
+
+      Use case resumes at step 2.
+
 **Use case: Edit a person**
 
 **MSS**
@@ -758,6 +770,12 @@ Given below are manual tests for major functional paths and edge cases.
    1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
    1. Test case: `delete 1`
       Expected: First contact is deleted from the list. Details of the deleted contact are shown in the status message. Timestamp in the status bar is updated.
+   1. Test case (password-protected contact): `delete 1 pw/hunter2`
+      Expected: Contact is deleted only when the supplied password is correct.
+   1. Test case (password-protected contact): `delete 1`
+      Expected: No person is deleted. Password-required error is shown.
+   1. Test case (unprotected contact): `delete 1 pw/hunter2`
+      Expected: No person is deleted. Error indicates `pw/` should be removed.
    1. Test case: `delete 0`
       Expected: No person is deleted. Error details are shown in the status message. Status bar remains the same.
    1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)

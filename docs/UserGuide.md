@@ -40,7 +40,7 @@ No programming experience is required.
 
 ### Key Features
 
-CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts; **Log** and **Edit** encounters; **View** contact details; **Set reminders**; **Search** contacts by name, alias, and/or tags (`find`); **Export** to CSV; **Sort** the contact list; and **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
+CrimeWatch supports the following features: **Add**, **Edit**, and **Delete** contacts; **Log** and **Edit** encounters; **View** contact details; **Set reminders**; **Search** contacts by name, alias, and/or tags (`find`); **Export** to CSV; **Sort** the contact list; and **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
 
 ## Command summary
 
@@ -48,7 +48,7 @@ CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts
 | --- | --- | --- |
 | Add Contact | `add n/NAME p/PHONE e/EMAIL a/ADDRESS s/STAGE [al/ALIAS(,ALIAS...)] [note/NOTES] [r/RISK] [pw/PASSWORD] [t/TAG]...` | [1) Add Contact](#1-add-contact-add) |
 | Edit Contact | `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [s/STAGE] [al/ALIAS(,ALIAS...)] [note/NOTES] [r/RISK] [pw/PASSWORD] [t/TAG]...` | [2) Edit Contact](#2-edit-contact-edit) |
-| Delete Contact | `delete INDEX` | [3) Delete Contact](#3-delete-contact-delete) |
+| Delete Contact | `delete INDEX [pw/PASSWORD]` | [3) Delete Contact](#3-delete-contact-delete) |
 | Log Encounter | `log INDEX d/DATE t/TIME l/LOCATION desc/DESCRIPTION [out/OUTCOME] [pw/PASSWORD]` | [4) Log Encounter](#4-log-encounter-log) |
 | Edit Encounter | `editencounter PERSON_INDEX ENCOUNTER_INDEX [d/DATE] [t/TIME] [l/LOCATION] [desc/DESCRIPTION] [out/OUTCOME]` | [5) Edit Encounter](#5-edit-encounter-editencounter) |
 | Set Reminder | `remind INDEX d/DATE t/TIME note/NOTE [pw/PASSWORD]` | [6) Set Reminder](#6-set-reminder-remind) |
@@ -153,14 +153,14 @@ Creates a new suspect profile.
 
 **Parameters**
 - `n/NAME` (required): suspect's full name (alphanumeric + spaces, not blank)
-- `p/PHONE` (required): phone number (digits only, at least 3 digits)
+- `p/PHONE` (required): phone number (Singapore format, 8 digits, starts with 6/8/9)
 - `e/EMAIL` (required): valid email address
 - `a/ADDRESS` (required): address (not blank)
 - `s/STAGE` (required): one of `surveillance`, `approached`, `cooperating`, `arrested`, `closed`
 - `al/ALIAS(,ALIAS...)` (optional): alias list, comma-separated
 - `note/NOTES` (optional): notes up to 500 characters, no newlines
 - `r/RISK` (optional): one of `low`, `medium`, `high` (default: `medium`)
-- `pw/PASSWORD` (optional): contact-level password for `view`
+- `pw/PASSWORD` (optional): sets a contact-level password. Once set, the correct password must be supplied via `pw/CURRENT_PASSWORD` to use `view`, `edit`, `log`, and `remind` on that contact
 - `t/TAG` (optional, repeatable): tags
 
 **Examples**
@@ -204,6 +204,7 @@ Updates details of an existing contact without deleting and re-adding the profil
 - Provided fields follow the same validation rules as `add`.
 - Repeating non-tag prefixes in the same command is not allowed.
 - For `p/PHONE`, only valid Singapore numbers are accepted: exactly 8 digits, starting with `6`, `8`, or `9`.
+- If the contact is password-protected, `pw/CURRENT_PASSWORD` is required. Omitting it or supplying the wrong password will result in an error.
 
 **Success output**
 `Edited Person: [person details]`
@@ -217,13 +218,21 @@ Updates details of an existing contact without deleting and re-adding the profil
 Removes a contact permanently, including all associated encounters and reminders.
 
 **Format**
-`delete INDEX`
+`delete INDEX [pw/PASSWORD]`
 
-**Example**
-`delete 3`
+**Parameters**
+- `INDEX` (compulsory): target contact in current list
+- **`pw/PASSWORD` (optional):** if the contact is password-protected, supply the **current** password
+
+**Examples**
+- `delete 3`
+- `delete 3 pw/oldSecret` (when the contact is password-protected)
 
 **Validation**
 - INDEX must exist in the current list.
+- If the contact is password-protected, omitting `pw/` causes a password-required error.
+- If the contact is password-protected, wrong `pw/` causes an incorrect-password error.
+- If the contact is not password-protected, do not supply `pw/`.
 - Error: `The person index provided is invalid`
 
 **Success output**
@@ -259,6 +268,7 @@ Records an interaction with a contact and appends it to the contact’s encounte
   Error: `Invalid time. Use 24-hour format HH:mm.`
 - DESCRIPTION cannot be blank; 1–500 characters
 - Repeating `d/`, `t/`, `l/`, `desc/`, `out/`, or `pw/` in the same command is not allowed.
+- If the contact is password-protected, `pw/CURRENT_PASSWORD` is required or the command will be rejected.
 - If the contact is not password-protected, do not supply `pw/`.
 
 **Success output**
@@ -279,8 +289,10 @@ Updates an existing encounter for a contact.
 - At least one prefixed field must be provided
 
 **Encounter index mapping**
-- Encounter cards shown in `view` are numbered newest first.
-- `ENCOUNTER_INDEX 1` means the most recent encounter shown as `#1`.
+- Encounters shown in `view` are numbered by date/time in descending order (most recent first).
+- `ENCOUNTER_INDEX 1` means the encounter currently shown as `#1`.
+- Indexes are ordered dynamically based on date/time
+- If encounter date/time changes (for example via `editencounter`), indexes may change accordingly.
 
 **Examples**
 - `editencounter 1 1 desc/Updated observation notes`
@@ -322,6 +334,7 @@ Adds a reminder entry to a contact.
 - TIME must be valid and use 24-hour `HH:mm`.
 - NOTE cannot be blank.
 - Repeating `d/`, `t/`, `note/`, or `pw/` in the same command is not allowed.
+- If the contact is password-protected, `pw/CURRENT_PASSWORD` is required or the command will be rejected.
 - If the contact is not password-protected, do not supply `pw/`.
 
 **Success output**
@@ -445,13 +458,29 @@ Exports all encounters whose **location** matches the value you give, to a UTF-8
 
 --------------------------------------------------------------------------------------------------------------------
 
-### 11) Clear All Data: `clear`
+### 11) List All Contacts: `list`
+
+Resets any active `find` filter and displays all contacts in the default order. Also closes any open contact profile in the side panel.
+
+**Format**
+`list`
+
+**When to use**
+- After a `find` command, to return to the full contact list
+- To close a currently open contact profile without opening another
+
+**Success output**
+`Listed all persons`
+
+--------------------------------------------------------------------------------------------------------------------
+
+### 12) Clear All Data: `clear`
 
 Clears all entries from CrimeWatch.
 
 Format: `clear`
 
-### 12) Exit Application: `exit`
+### 13) Exit Application: `exit`
 
 Exits the program.
 
@@ -475,6 +504,8 @@ Furthermore, certain edits can cause CrimeWatch to behave in unexpected ways (e.
 _Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
+
+<div style="page-break-after: always;"></div>
 
 ## FAQ
 
@@ -502,8 +533,10 @@ _Details coming soon ..._
 **Q: My command is giving an error even though it looks correct. What should I check?**<br>
 **A**: 1) Ensure you're not repeating prefixes (e.g., `n/... n/...` is invalid). 2) Check date/time formats are exactly `YYYY-MM-DD` and `HH:mm`. 3) Verify the index exists in the current contact list. 4) If copying from a PDF, manually retype the command to avoid hidden space issues.
 
-**Q: What if `crimewatch.json` is corrupted or cannot be read?**<br>
-**A**: CrimeWatch shows an error when the app opens. Only the `exit` command is accepted until you repair or replace the file; other commands are blocked and your data file is not overwritten. Use `exit`, fix `crimewatch.json` (e.g. from a backup), then restart.
+<div style="page-break-after: always;"></div>
+
+**Q: What if `addressbook.json` is corrupted or cannot be read?**<br>
+**A**: CrimeWatch shows an error when the app opens. Only the `exit` command is accepted until you repair or replace the file; other commands are blocked and your data file is not overwritten. Use `exit`, fix `addressbook.json` (e.g. from a backup), then restart.
 
 --------------------------------------------------------------------------------------------------------------------
 
