@@ -40,7 +40,7 @@ No programming experience is required.
 
 ### Key Features
 
-CrimeWatch supports 11 core features: **Add**, **Edit**, and **Delete** contacts; **Log** and **Edit** encounters; **View** contact details; **Set reminders**; **Search** contacts by name, alias, and/or tags (`find`); **Export** to CSV; **Sort** the contact list; and **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
+CrimeWatch supports the following features: **Add**, **Edit**, and **Delete** contacts; **Log** and **Edit** encounters; **View** contact details; **Set reminders**; **Search** contacts by name, alias, and/or tags (`find`); **Export** to CSV; **Sort** the contact list; and **Protect** sensitive contacts with passwords. See [Command summary](#command-summary) for detailed formats.
 
 ## Command summary
 
@@ -153,7 +153,7 @@ Creates a new suspect profile.
 
 **Parameters**
 - `n/NAME` (required): suspect's full name (alphanumeric + spaces, not blank)
-- `p/PHONE` (required): phone number (digits only, at least 3 digits)
+- `p/PHONE` (required): phone number (Singapore format, 8 digits, starts with 6/8/9)
 - `e/EMAIL` (required): valid email address
 - `a/ADDRESS` (required): address (not blank)
 - `s/STAGE` (required): one of `surveillance`, `approached`, `cooperating`, `arrested`, `closed`
@@ -478,6 +478,8 @@ _Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
+<div style="page-break-after: always;"></div>
+
 ## FAQ
 
 **Q: How do I transfer my data to another computer?**<br>
@@ -504,8 +506,10 @@ _Details coming soon ..._
 **Q: My command is giving an error even though it looks correct. What should I check?**<br>
 **A**: 1) Ensure you're not repeating prefixes (e.g., `n/... n/...` is invalid). 2) Check date/time formats are exactly `YYYY-MM-DD` and `HH:mm`. 3) Verify the index exists in the current contact list. 4) If copying from a PDF, manually retype the command to avoid hidden space issues.
 
-**Q: What if `crimewatch.json` is corrupted or cannot be read?**<br>
-**A**: CrimeWatch shows an error when the app opens. Only the `exit` command is accepted until you repair or replace the file; other commands are blocked and your data file is not overwritten. Use `exit`, fix `crimewatch.json` (e.g. from a backup), then restart.
+<div style="page-break-after: always;"></div>
+
+**Q: What if `addressbook.json` is corrupted or cannot be read?**<br>
+**A**: CrimeWatch shows an error when the app opens. Only the `exit` command is accepted until you repair or replace the file; other commands are blocked and your data file is not overwritten. Use `exit`, fix `addressbook.json` (e.g. from a backup), then restart.
 
 --------------------------------------------------------------------------------------------------------------------
 
