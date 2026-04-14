@@ -890,3 +890,9 @@ Proposed behavior:
 - Continue to show full details only in the profile panel after successful password validation.
 
 This reduces shoulder-surfing and incidental exposure risks while preserving operational usability.
+
+---
+
+**6. Add support for password by Editencouter**
+
+Currently, the EditEncounter functionality allows modifications to protected contacts' encounters without requiring a password. Add support for Editencounter on protected contacts. This makes the behaviour of protected contact more consistent.
