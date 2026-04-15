@@ -16,7 +16,7 @@ AI tools such as Claude, ChatGPT was used to support:
 - All AI-generated content was reviewed, validated, and adapted by the development team to ensure correctness and alignment with project requirements.
 
 --------------------------------------------------------------------------------------------------------------------
-
+<div style="page-break-after: always;"></div>
 ## **Setting up, getting started**
 
 Refer to [_Setting up and getting started_](SettingUp.md).
@@ -729,7 +729,7 @@ Use case ends.
 * **Full Profile**: all details of a contact, including encounters and reminders, shown when viewing a protected contact with the correct password.
 
 --------------------------------------------------------------------------------------------------------------------
-
+<div style="page-break-after: always;"></div>
 ## **Appendix: Instructions for manual testing**
 
 Given below are manual tests for major functional paths and edge cases.
@@ -890,3 +890,9 @@ Proposed behavior:
 - Continue to show full details only in the profile panel after successful password validation.
 
 This reduces shoulder-surfing and incidental exposure risks while preserving operational usability.
+
+---
+
+**6. Add support for password by Editencouter**
+
+Currently, the EditEncounter functionality allows modifications to protected contacts' encounters without requiring a password. Add support for Editencounter on protected contacts. This makes the behaviour of protected contact more consistent.
